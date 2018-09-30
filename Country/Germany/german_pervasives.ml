@@ -37,6 +37,8 @@ let hmx x=
    Some(idx)->Coma_state.hm_at_idx (German_wrapper.data()) idx
    |None->raise(No_module_with_name(x));;  
 
+let nmx x=Half_dressed_module.naked_module (hmx x);;
+
 let abo x=
   let wmdata=German_wrapper.data() in
   Image.image (fun nm->
