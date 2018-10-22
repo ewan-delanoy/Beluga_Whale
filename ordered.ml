@@ -241,4 +241,4 @@ let diff_plaen (kenver: 'a Total_ordering.t) =
                 )
               )      
           ) in
-          tempf;;        
+          tempf;;                   

@@ -18,7 +18,7 @@ let other_world=
 
 
 let main_ref=Coma_state_field.empty_one
-                usual_root
-                backup_root;;
+                Coma_big_constant.this_world
+                Coma_big_constant.copied_world;;
 
                            

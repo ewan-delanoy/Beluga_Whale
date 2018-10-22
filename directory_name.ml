@@ -51,4 +51,4 @@ let cut_beginning (Directory_name_t.D s) w=
    
 
 
-let ocaml_name (Directory_name_t.D s)="Directory_name"^"."^"unsafe_from_string(\""^s^"\")";;
+let ocaml_name (Directory_name_t.D s)="Directory_name"^"."^"unsafe_from_string(\""^s^"\")";;           

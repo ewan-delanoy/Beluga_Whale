@@ -35,4 +35,4 @@ let rename_endsubdirectory (Subdirectory_t.SD(old_subdir),new_esdname)
 rename_endsubdirectory (SD("Haag/Huug"),"Java") (SD "Haag/Huug/King/Jordan");;
 rename_endsubdirectory (SD("Haag"),"Java") (SD "Haag/Huug/King/Jordan");;
 
-*)   
+*)              

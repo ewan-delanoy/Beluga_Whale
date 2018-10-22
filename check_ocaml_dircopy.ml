@@ -64,3 +64,4 @@ let check root_dir=
   and rc2=List.filter is_admissible (Dircopy_diff.recently_changed diff)
   and rc3=List.filter is_admissible (Dircopy_diff.recently_created diff) in
   (rc1,rc2,rc3);;
+           

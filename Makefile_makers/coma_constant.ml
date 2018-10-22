@@ -17,6 +17,10 @@ let old_and_hardly_reusable=
 let temporary=
   Subdirectory.of_string "Temporary";;
 
+let githubbed_archive=
+  Subdirectory.of_string "Githubbed_archive";;
+
+
 let build_subdir=      Subdirectory.of_string "_build";;
 let debug_build_subdir=Subdirectory.of_string "_debug_build";;  
 let exec_build_subdir= Subdirectory.of_string "_exec_build";;  
@@ -47,3 +51,4 @@ let path_for_debugged_file=name_for_debugged_module^".ml";;
 
    
 
+           

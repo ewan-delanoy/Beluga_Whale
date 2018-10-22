@@ -14,3 +14,4 @@ let instructions main_root dirs=
   let temp2=("B "^s_root^"_build/")::temp1 in
   "\n\n\n"^(String.concat "\n" temp2)^"\n\n\n";; 
 
+           

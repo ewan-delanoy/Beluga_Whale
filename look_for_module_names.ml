@@ -75,4 +75,4 @@ indices_in_string "(* Haag. *)234 Dog.\"open Garfield;\"67 Corn.4";;
 
 
    
-*)   
+*)              

@@ -6,4 +6,4 @@ Subdirectories name, with the trailing slash removed.
 
 *)
 
-type t=R of string;;
+type t=R of string;;           

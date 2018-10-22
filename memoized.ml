@@ -71,3 +71,4 @@ let reversible (f:'a->'b)=
     else x
     ) in
   (memoized_f,memoized_inverse_of_f,memoized_projector,irreducibles,minimal_reductions);;
+           

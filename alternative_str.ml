@@ -133,4 +133,4 @@ let search_forward (M(_,rgxp,b)) s i0=
    let j1=(Str.search_forward rgxp s (i0-1))+1 in
    let j2=j1+(String.length(Str.matched_string s))-b-1 in
    (j1,j2);;
-  *) 
+  *)            

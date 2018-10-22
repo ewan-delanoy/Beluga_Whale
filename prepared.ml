@@ -64,3 +64,4 @@ let partition_in_two_parts f l=
                  else partition_easily0((xi,List.rev(ly))::graet,x,[y],peurrest)
  ) in
  partition_easily0([],x1,[y1],lost);;  
+           
