@@ -5,16 +5,6 @@
 
 *)
 
-let usual_root=
-                Root_directory.of_string 
-                "/Users/ewandelanoy/Documents/OCaml/Ordinary";;
-let backup_root=
-                Root_directory.of_string 
-                "/Users/ewandelanoy/Documents/OCaml/Githubbed_ocaml";;
-
-let other_world=
-                Root_directory.of_string 
-                "/Users/ewandelanoy/Documents/OCaml/Idaho";;
 
 
 let main_ref=Coma_state_field.empty_one

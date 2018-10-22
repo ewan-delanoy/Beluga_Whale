@@ -5,8 +5,8 @@
 
 *)
 
-let usual_root=Usual_coma_state.usual_root;;
-let usual_dir_for_backup=Usual_coma_state.backup_root;;
+let usual_root=Coma_big_constant.this_world;;
+let usual_dir_for_backup=Coma_big_constant.copied_world;;
 
 
 module Private=struct
