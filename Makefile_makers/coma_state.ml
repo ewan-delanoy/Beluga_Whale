@@ -1157,7 +1157,6 @@ module Ingredients_for_ocaml_target=struct
       (targets_from_ancestors cs idx)@
       (immediate_ingredients_for_cmo cs idx hm);;
   
-  
   let ingredients_for_dcmo cs hm=
     let nm=Half_dressed_module.naked_module hm in
     let opt_idx=seek_module_index cs nm in
@@ -1202,8 +1201,8 @@ module Ingredients_for_ocaml_target=struct
     if mli_reg&&(not ml_reg)
     then (ingredients_for_cmi cs hm)@[Ocaml_target.cmi hm]
     else (ingredients_for_cmo cs hm)@[Ocaml_target.cmo hm];;  
-    
-    
+
+
   let ingredients_for_ocaml_target cs=function
     Ocaml_target.NO_DEPENDENCIES(mlx)->[]
    |Ocaml_target.ML_FROM_MLL(hm)->ingredients_for_ml_from_mll cs hm
@@ -1215,12 +1214,8 @@ module Ingredients_for_ocaml_target=struct
    |Ocaml_target.CMX(hm)->ingredients_for_cmx cs hm
    |Ocaml_target.EXECUTABLE(hm)->ingredients_for_executable cs hm
    |Ocaml_target.DEBUGGABLE(hm)->ingredients_for_debuggable cs hm;;      
-   
   
   
-  let marked_ingredients_for_full_compilation cs name l=
-    let temp1=Image.image (ingredients_for_usual_element cs) l in
-    Preserve_initial_ordering.and_mark_endings temp1;;
   
   let module_dependency_for_nodep mlx=false;;
   let module_dependency_for_ml_from_mll cs l_hm hm1=
@@ -1275,6 +1270,70 @@ module Ingredients_for_ocaml_target=struct
   
 
 end;;  
+
+module Shortened_ingredients_for_ocaml_target=struct
+
+exception Unregistered_cmio  of Half_dressed_module.t;;
+exception Unregistered_element  of Half_dressed_module.t;;
+  
+let targets_from_ancestor_data cs idx=
+    let hm=hm_at_idx cs idx in
+    if check_ending_in_at_idx Ocaml_ending.mll cs idx
+    then [Ocaml_target.ml_from_mll hm;Ocaml_target.cmo hm]
+    else 
+    if check_ending_in_at_idx Ocaml_ending.mly cs idx
+    then [Ocaml_target.ml_from_mly hm;Ocaml_target.cmo hm]
+    else
+    if check_ending_in_at_idx Ocaml_ending.ml cs idx
+    then [Ocaml_target.cmo hm]
+    else [Ocaml_target.cmi hm];;  
+  
+let targets_from_ancestors cs idx=
+       let ancestors=ancestors_at_idx cs idx in
+       let temp1=Image.image (fun nm2->
+              let idx2=find_module_index cs nm2 in
+              targets_from_ancestor_data cs idx2
+            ) ancestors in
+       Preserve_initial_ordering.preserve_initial_ordering temp1;;
+
+
+let immediate_ingredients_for_cmio cs idx hm=
+      if check_ending_in_at_idx Ocaml_ending.mll cs idx
+      then [Ocaml_target.ml_from_mll hm]
+      else 
+      if check_ending_in_at_idx Ocaml_ending.mly cs idx
+      then [Ocaml_target.ml_from_mly hm]
+      else [];; 
+
+
+let ingredients_for_cmio cs hm=
+    let nm=Half_dressed_module.naked_module hm in
+    let opt_idx=seek_module_index cs nm in
+    if opt_idx=None then raise(Unregistered_cmio(hm)) else 
+    let idx=Option.unpack opt_idx in
+    (targets_from_ancestors cs idx)@
+    (immediate_ingredients_for_cmio cs idx hm);;
+
+
+
+let ingredients_for_usual_element cs hm=
+    let nm=Half_dressed_module.naked_module hm in
+    let opt_idx=seek_module_index cs nm in
+    if opt_idx=None then raise(Unregistered_element(hm)) else 
+    let idx=Option.unpack opt_idx in
+    let mli_reg=check_ending_in_at_idx Ocaml_ending.mli cs idx
+    and ml_reg=check_ending_in_at_idx Ocaml_ending.mli cs idx in
+    if mli_reg&&(not ml_reg)
+    then (ingredients_for_cmio cs hm)@[Ocaml_target.cmi hm]
+    else (ingredients_for_cmio cs hm)@[Ocaml_target.cmo hm];;  
+
+
+let marked_ingredients_for_full_compilation cs name l=
+    let temp1=Image.image (ingredients_for_usual_element cs) l in
+    Preserve_initial_ordering.and_mark_endings temp1;;
+
+
+end;;
 
 module Command_for_ocaml_target=struct
 
@@ -1483,8 +1542,10 @@ module Ocaml_target_making=struct
 
   let cmd_for_tgt=Command_for_ocaml_target.command_for_ocaml_target;;
 
-  let ingr_for_tgt =Ingredients_for_ocaml_target.ingredients_for_ocaml_target;;
-  let ingr_for_top =Ingredients_for_ocaml_target.marked_ingredients_for_full_compilation;;
+  let ingr_for_tgt =
+    Ingredients_for_ocaml_target.ingredients_for_ocaml_target;;
+  let ingr_for_top =
+    Shortened_ingredients_for_ocaml_target.marked_ingredients_for_full_compilation;;
   
   
   let is_up_to_date dir tgts tgt=
@@ -1494,8 +1555,9 @@ module Ocaml_target_making=struct
     if Ocaml_target.test_target_existence dir tgt
     then List.mem tgt tgts
     else false;;
-  
-  let unit_make dir (bowl,(mdata,tgts,rejected_ones)) tgt=
+
+
+  let unit_make is_an_ending_or_not dir (bowl,(mdata,tgts,rejected_ones)) tgt=
     if (not bowl)
     then (bowl,(mdata,tgts,rejected_ones))
     else
@@ -1520,18 +1582,21 @@ module Ocaml_target_making=struct
           |Some(hm)->hm::rejected_ones
           )  in
          (false,(mdata,tgts,rejected_ones2));;
-  
-  let make dir (mdata,tgts,rejected_ones) tgt=
+ 
+  let castle dir (mdata,tgts,rejected_ones) tgt=
     let l=ingr_for_tgt mdata tgt in
-    List.fold_left (unit_make dir)  (true,(mdata,tgts,rejected_ones)) l;;
-    
+    List.fold_left (unit_make Is_an_ending_or_not.No dir)  (true,(mdata,tgts,rejected_ones)) l;;
+
+
   exception Ending_for_full_compilation_pusher;;  
   
+
+
   let pusher_for_full_compilation dir (successful_ones,to_be_treated,ts)=
     match to_be_treated with
     []->raise(Ending_for_full_compilation_pusher)
     |(tgt,is_an_ending_or_not)::others->
-    let (bowl2,ts2)=unit_make dir (true,ts) tgt in
+    let (bowl2,ts2)=unit_make is_an_ending_or_not dir (true,ts) tgt in
     if bowl2
     then let new_successful_ones=(
            if is_an_ending_or_not=Is_an_ending_or_not.Yes
@@ -1569,7 +1634,8 @@ module Ocaml_target_making=struct
            List.rev_append newly_rejected_ones rejected_ones2
          ) in
          (successful_ones,remains,(mdata2,tgts2,rejected_ones2));; 
-  
+
+
   let rec  iterator_for_full_compilation dir (successful_ones,to_be_treated,ts)=
     match to_be_treated with
     []->(List.rev successful_ones,ts)
@@ -1600,11 +1666,11 @@ let make_final_target mode opt_argument cs=
         let cs2=recompute_module_info cs hm in
         let old_tgts=targets cs in
         let tgt=Ocaml_target.debuggable hm in
-        make (root cs) (cs2,old_tgts,[]) tgt
+        castle (root cs) (cs2,old_tgts,[]) tgt
     |Compilation_mode_t.Executable->
         let hm=Option.unpack opt_argument in
         let tgt=Ocaml_target.EXECUTABLE hm in 
-        let _=make (root cs) (cs,targets cs,[]) tgt in
+        let _=castle (root cs) (cs,targets cs,[]) tgt in
         let l_cmd=Command_for_ocaml_target.command_for_ocaml_target
          (root cs) cs tgt in
         let _=Image.image Unix_command.hardcore_uc l_cmd in
@@ -1852,9 +1918,9 @@ module Target_system_creation=struct
            Coma_constant.temporary;
         ]
       in
-      let _=Unix_command.uc ("mkdir -p "^s_main_dir^(Subdirectory.connectable_to_subpath Coma_constant.build_subdir)) in
-      let _=Unix_command.uc ("mkdir -p "^s_main_dir^(Subdirectory.connectable_to_subpath Coma_constant.debug_build_subdir)) in
-      let _=Unix_command.uc ("mkdir -p "^s_main_dir^(Subdirectory.connectable_to_subpath Coma_constant.exec_build_subdir)) in
+      let _=Unix_command.uc ("mkdir -p "^s_main_dir^"/"^(Subdirectory.connectable_to_subpath Coma_constant.build_subdir)) in
+      let _=Unix_command.uc ("mkdir -p "^s_main_dir^"/"^(Subdirectory.connectable_to_subpath Coma_constant.debug_build_subdir)) in
+      let _=Unix_command.uc ("mkdir -p "^s_main_dir^"/"^(Subdirectory.connectable_to_subpath Coma_constant.exec_build_subdir)) in
       let _=Image.image (fun s->
         Unix_command.uc ("touch "^s_main_dir^"/"^s)
          ) ([dname^".ml";
@@ -1896,6 +1962,7 @@ let select_good_files s_main_dir=
             Coma_constant.left_out_of_updating;
             Coma_constant.old_and_hardly_reusable;
             Coma_constant.temporary;
+            Coma_constant.githubbed_archive;
             Coma_constant.build_subdir;
             Coma_constant.debug_build_subdir;
             Coma_constant.exec_build_subdir; 
@@ -2390,17 +2457,20 @@ module Create_or_update_copied_compiler=struct
   
   let file_for_backup="Country/Alaska/alaskan_backup_target_system.ml";;
   
-  let replacement_for_special_file (sourcedir,destdir) filename=
+  let replacements_for_special_file (sourcedir,destdir) filename=
     if filename=file_for_backup
-    then ("let github_after_backup=ref(true)"^Double_semicolon.ds,
-          "let github_after_backup=ref(false)"^Double_semicolon.ds)
-    else (Root_directory.without_trailing_slash sourcedir,
-          Root_directory.without_trailing_slash destdir);;
+    then [("let github_after_backup=ref(true)"^Double_semicolon.ds,
+          "let github_after_backup=ref(false)"^Double_semicolon.ds)]
+    else [(Root_directory.without_trailing_slash sourcedir,
+          Root_directory.without_trailing_slash destdir);
+          "/Users/ewandelanoy/Documents/OCaml/Githubbed_ocaml",
+          "/Users/ewandelanoy/Documents/OCaml/Dummy_directory"
+          ];;
   
   let prepare_special_file (sourcedir,destdir) filename=
     let the_file=Absolute_path.create_file(Root_directory.join destdir filename) in
-    Replace_inside.replace_inside_file
-    (replacement_for_special_file (sourcedir,destdir) filename)
+    Replace_inside.replace_several_inside_file
+    (replacements_for_special_file (sourcedir,destdir) filename)
     the_file;;
   
   let init_dir=
@@ -2427,7 +2497,7 @@ module Create_or_update_copied_compiler=struct
     let _=Image.image (prepare_special_file (sourcedir,destdir))
       (
         up_to_date_but_not_registered_files@
-      ["Country/Germany/german_wrapper.ml";file_for_backup]
+      ["Makefile_makers/usual_coma_state.ml";file_for_backup]
       ) 
      in 
     Target_system_creation.from_main_directory destdir backup_dir;;
@@ -2444,3 +2514,4 @@ module Create_or_update_copied_compiler=struct
       
 
 end;;  
+           
