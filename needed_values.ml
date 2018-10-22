@@ -6,7 +6,7 @@
 
 
 
-let backup_root=Usual_coma_state.backup_root;;
+let backup_root=Coma_big_constant.copied_world;;
 
 let hi = List.length ;; 
 
@@ -16,6 +16,6 @@ let initialize_toplevel=German_wrapper.initialize_if_empty;;
 
 let ofo=Ordered.forget_order;;
 
-let root=Usual_coma_state.usual_root;;
+let root=Coma_big_constant.this_world;;
 
 let ucs=Usual_coma_state.main_ref;;           
