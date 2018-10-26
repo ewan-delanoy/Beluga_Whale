@@ -10,7 +10,7 @@ Usable on a github clone of the remote master version.
 let is_admissible s=
   (List.for_all (
      fun edg->not(Substring.ends_with s ("."^edg))
-  ) ["depend";"ocamlinit";"cmi";"cmo";"DS_Store";"txt";"php";
+  ) ["depend";"ocamlinit";"cmi";"cmo";"DS_Store";"txt";"php";"js";
      "ocaml_made";"ocaml_debuggable"])
   &&
    (List.for_all (
