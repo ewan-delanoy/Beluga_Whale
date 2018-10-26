@@ -127,7 +127,7 @@ let example=initialize
 
 let example=initialize
    (
-     "/Users/ewandelanoy/Documents/html_files/Printable/",
+     "/Users/ewandelanoy/Documents/html_files/OCRed_texts/",
      "agreda.pdf",
      (1,431)
      ,
