@@ -2449,8 +2449,9 @@ end;;
 
 module Create_or_update_copied_compiler=struct
 
-  let prepare mdata (sourcedir,destdir)=
-    let l1=all_short_paths mdata in
+  let prepare cs destdir=
+    let sourcedir=root cs in 
+    let l1=all_short_paths cs in
     let main_diff=Prepare_dircopy_update.compute_diff 
           (sourcedir,l1) destdir in
     Prepare_dircopy_update.commands_for_update (sourcedir,destdir) main_diff;;
@@ -2483,7 +2484,8 @@ module Create_or_update_copied_compiler=struct
         Coma_constant.path_for_printersfile;
      ];;
   
-  let ucc mdata (sourcedir,destdir,backup_dir)=
+  let ucc cs (destdir,backup_dir)=
+    let sourcedir=root cs in 
     let knr=Subdirectory.without_trailing_slash(Coma_constant.kept_up_to_date_but_not_registered) in
     let s_dir=Root_directory.connectable_to_subpath destdir in 
     let _=Unix_command.uc ("mkdir -p "^s_dir^(Subdirectory.connectable_to_subpath Coma_constant.build_subdir)) in
@@ -2493,7 +2495,7 @@ module Create_or_update_copied_compiler=struct
     let _=Image.image (
         fun s->Unix_command.uc("touch "^s_dir^s)
     ) up_to_date_but_not_registered_files in
-    let _=Image.image Unix_command.uc (prepare mdata (sourcedir,destdir)) in
+    let _=Image.image Unix_command.uc (prepare cs destdir) in
     let _=Image.image (prepare_special_file (sourcedir,destdir))
       (
         up_to_date_but_not_registered_files@
