@@ -153,10 +153,9 @@ let tw x=
 
 
 let ucc ()=Coma_state.Create_or_update_copied_compiler.ucc 
-  (German_wrapper.data())
- (cdir,
-  Root_directory.of_string "/Users/ewandelanoy/Documents/OCaml/Cherokee",
-  German_wrapper.usual_dir_for_backup);;
+  Usual_coma_state.main_ref
+ (Coma_big_constant.copied_world,
+  Coma_big_constant.copied_next_world);;
 
 let reco_with_optional_comment opt=
   let (bowl,short_paths)=German_wrapper.recompile () in
