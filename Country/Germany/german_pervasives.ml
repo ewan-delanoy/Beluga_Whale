@@ -154,7 +154,7 @@ let tw x=
 
 let ucc ()=Coma_state.Create_or_update_copied_compiler.ucc 
   Usual_coma_state.main_ref
- (Coma_big_constant.copied_world,
+ (Coma_big_constant.next_world,
   Coma_big_constant.copied_next_world);;
 
 let reco_with_optional_comment opt=
