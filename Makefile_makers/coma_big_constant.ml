@@ -13,7 +13,7 @@ let next_world=
                 Root_directory.of_string 
                 "/Users/ewandelanoy/Documents/OCaml/Idaho";;
 
-let copied_world=
+let backup_dir_for_this_world=
                 Root_directory.of_string 
                 "/Users/ewandelanoy/Documents/OCaml/Githubbed_ocaml";;                
 

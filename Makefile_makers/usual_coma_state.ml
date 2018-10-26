@@ -9,6 +9,6 @@
 
 let main_ref=Coma_state_field.empty_one
                 Coma_big_constant.this_world
-                Coma_big_constant.copied_world;;
+                Coma_big_constant.backup_dir_for_this_world;;
 
                            

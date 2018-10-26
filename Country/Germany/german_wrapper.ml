@@ -6,7 +6,7 @@
 *)
 
 let usual_root=Coma_big_constant.this_world;;
-let usual_dir_for_backup=Coma_big_constant.copied_world;;
+let usual_dir_for_backup=Coma_big_constant.backup_dir_for_this_world;;
 
 
 module Private=struct

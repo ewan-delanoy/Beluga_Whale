@@ -6,7 +6,7 @@
 
 
 
-let backup_root=Coma_big_constant.copied_world;;
+let backup_root=Coma_big_constant.backup_dir_for_this_world;;
 
 let hi = List.length ;; 
 
