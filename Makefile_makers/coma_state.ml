@@ -2513,7 +2513,7 @@ module Create_or_update_copied_compiler=struct
     let (new_mdata2,new_tgts2,preqt)=Target_system_creation.from_main_directory destdir backup_dir in 
     let uple=uple_form new_mdata2 in 
     let _=Save_all.write_all 
-    (sourcedir, 
+    (destdir, 
       Coma_constant.name_for_makefile,
       Coma_constant.name_for_targetfile,
       Coma_constant.name_for_loadingsfile,
