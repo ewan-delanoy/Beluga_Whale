@@ -1314,8 +1314,6 @@ let ingredients_for_cmio cs hm=
     (targets_from_ancestors cs idx)@
     (immediate_ingredients_for_cmio cs idx hm);;
 
-
-
 let ingredients_for_usual_element cs hm=
     let nm=Half_dressed_module.naked_module hm in
     let opt_idx=seek_module_index cs nm in
@@ -1323,9 +1321,12 @@ let ingredients_for_usual_element cs hm=
     let idx=Option.unpack opt_idx in
     let mli_reg=check_ending_in_at_idx Ocaml_ending.mli cs idx
     and ml_reg=check_ending_in_at_idx Ocaml_ending.mli cs idx in
-    if mli_reg&&(not ml_reg)
-    then (ingredients_for_cmio cs hm)@[Ocaml_target.cmi hm]
-    else (ingredients_for_cmio cs hm)@[Ocaml_target.cmo hm];;  
+    if mli_reg
+    then if ml_reg
+         then (ingredients_for_cmio cs hm)@[Ocaml_target.cmi hm;Ocaml_target.cmo hm]
+         else (ingredients_for_cmio cs hm)@[Ocaml_target.cmi hm]
+    else (ingredients_for_cmio cs hm)@[Ocaml_target.cmo hm];;
+
 
 
 let marked_ingredients_for_full_compilation cs name l=
