@@ -2510,7 +2510,16 @@ module Create_or_update_copied_compiler=struct
       ["Makefile_makers/usual_coma_state.ml";file_for_backup]
       ) 
      in 
-    Target_system_creation.from_main_directory destdir backup_dir;;
+    let (new_mdata2,new_tgts2,preqt)=Target_system_creation.from_main_directory destdir backup_dir in 
+    let uple=uple_form new_mdata2 in 
+    let _=Save_all.write_all 
+    (sourcedir, 
+      Coma_constant.name_for_makefile,
+      Coma_constant.name_for_targetfile,
+      Coma_constant.name_for_loadingsfile,
+      Coma_constant.name_for_printersfile
+    ) uple in
+    (new_mdata2,new_tgts2,preqt);;
          
          
   
