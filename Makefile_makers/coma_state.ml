@@ -1640,7 +1640,7 @@ let bad_pusher_argument=
 
 let pusher_for_full_compilation dir (successful_ones,to_be_treated,ts)=
   try naive_pusher_for_full_compilation dir (successful_ones,to_be_treated,ts) with
-  exn->(bad_pusher_argument:=Some(successful_ones,to_be_treated,ts);raise(exn));;
+  exn->(bad_pusher_argument:=Some(dir,successful_ones,to_be_treated,ts);raise(exn));;
 
 
   let rec  iterator_for_full_compilation dir (successful_ones,to_be_treated,ts)=
