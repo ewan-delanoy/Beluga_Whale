@@ -1592,7 +1592,7 @@ module Ocaml_target_making=struct
   
 
 
-  let pusher_for_full_compilation dir (successful_ones,to_be_treated,ts)=
+  let naive_pusher_for_full_compilation dir (successful_ones,to_be_treated,ts)=
     match to_be_treated with
     []->raise(Ending_for_full_compilation_pusher)
     |(tgt,is_an_ending_or_not)::others->
@@ -1634,6 +1634,13 @@ module Ocaml_target_making=struct
            List.rev_append newly_rejected_ones rejected_ones2
          ) in
          (successful_ones,remains,(mdata2,tgts2,rejected_ones2));; 
+
+let bad_pusher_argument=
+  ref None;;
+
+let pusher_for_full_compilation dir (successful_ones,to_be_treated,ts)=
+  try naive_pusher_for_full_compilation dir (successful_ones,to_be_treated,ts) with
+  exn->(bad_pusher_argument:=Some(successful_ones,to_be_treated,ts);raise(exn));;
 
 
   let rec  iterator_for_full_compilation dir (successful_ones,to_be_treated,ts)=
