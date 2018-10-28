@@ -2511,6 +2511,10 @@ module Create_or_update_copied_compiler=struct
       ) 
      in 
     let (new_mdata2,new_tgts2,preqt)=Target_system_creation.from_main_directory destdir backup_dir in 
+    let _=(
+        set_targets new_mdata2 new_tgts2;
+        set_preq_types new_mdata2 preqt
+    ) in
     let uple=uple_form new_mdata2 in 
     let _=Save_all.write_all 
     (destdir, 
@@ -2520,7 +2524,7 @@ module Create_or_update_copied_compiler=struct
       Coma_constant.name_for_printersfile
     ) uple in
     (new_mdata2,new_tgts2,preqt);;
-         
+
          
   
   
