@@ -2505,7 +2505,6 @@ module Create_or_update_copied_compiler=struct
   
   let ucc cs (destdir,backup_dir)=
     let sourcedir=root cs in 
-    let knr=Subdirectory.without_trailing_slash(Coma_constant.kept_up_to_date_but_not_registered) in
     let s_dir=Root_directory.connectable_to_subpath destdir in 
     let _=Image.image (
        fun subdir ->

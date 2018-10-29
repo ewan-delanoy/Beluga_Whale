@@ -47,7 +47,8 @@ let up_to_date_but_not_registered_files=
 let name_for_debugged_module="debugged";;  
 let path_for_debugged_file=name_for_debugged_module^".ml";; 
 
-  
+let path_for_backerfile="Country/Alaska/alaskan_backup_target_system.ml";; 
+let path_for_usual_state_file="Makefile_makers/usual_coma_state.ml";; 
 
    
 
