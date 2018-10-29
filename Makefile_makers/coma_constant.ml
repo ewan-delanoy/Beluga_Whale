@@ -24,6 +24,9 @@ let githubbed_archive=
 let build_subdir=      Subdirectory.of_string "_build";;
 let debug_build_subdir=Subdirectory.of_string "_debug_build";;  
 let exec_build_subdir= Subdirectory.of_string "_exec_build";;  
+let backer_subdir= Subdirectory.of_string "Country/Alaska";;
+let usualstate_subdir= Subdirectory.of_string "Makefile_makers";;
+
 
 let name_for_makefile="makefile";;
 let name_for_targetfile="targetfile.ocaml_made";;
@@ -31,12 +34,17 @@ let name_for_merlinfile=".merlin";;
 
 let name_for_loadingsfile="my_loadings.ml";;
 let name_for_printersfile="my_printers.ml";;
-
+let name_for_backerfile="alaskan_backup_target_system.ml";;
+let name_for_usualstatefile="usual_coma_state.ml";;
 
 let path_for_loadingsfile=
   (Subdirectory.connectable_to_subpath automatically_generated_subdir)^name_for_loadingsfile;;
 let path_for_printersfile=
   (Subdirectory.connectable_to_subpath automatically_generated_subdir)^name_for_printersfile;;
+let path_for_backerfile=
+   (Subdirectory.connectable_to_subpath backer_subdir)^name_for_backerfile;;
+let path_for_usualstatefile=
+   (Subdirectory.connectable_to_subpath usualstate_subdir)^name_for_usualstatefile;;
 
 let up_to_date_but_not_registered_files=
     [
