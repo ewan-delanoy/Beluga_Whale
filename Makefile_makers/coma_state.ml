@@ -1913,7 +1913,7 @@ module Target_system_creation=struct
      
     let init_dir=
       Subdirectory.connectable_to_subpath 
-      (Coma_constant.kept_up_to_date_but_not_registered);;
+      (Coma_constant.automatically_generated_subdir);;
     
     let copy_special_files s_main_dir=
       let dname=Coma_constant.name_for_debugged_module in
@@ -1922,7 +1922,7 @@ module Target_system_creation=struct
         Unix_command.uc 
           ("mkdir -p "^s_main_dir^"/"^(Subdirectory.without_trailing_slash s))
       ) [
-           Coma_constant.kept_up_to_date_but_not_registered;
+           Coma_constant.automatically_generated_subdir;
            Coma_constant.temporary;
         ]
       in
@@ -1966,7 +1966,7 @@ let select_good_files s_main_dir=
          (List.for_all (fun beg->not(Substring.begins_with t beg)) 
          (Image.image Subdirectory.connectable_to_subpath 
           [
-            Coma_constant.kept_up_to_date_but_not_registered;
+            Coma_constant.automatically_generated_subdir;
             Coma_constant.left_out_of_updating;
             Coma_constant.old_and_hardly_reusable;
             Coma_constant.temporary;
@@ -2395,7 +2395,7 @@ module Save_all=struct
   
     let save_loadingsfile (root,location_for_loadingsfile) (dirs,tgts)=
        let path_for_loadingsfile=
-           (Subdirectory.connectable_to_subpath Coma_constant.kept_up_to_date_but_not_registered)^
+           (Subdirectory.connectable_to_subpath Coma_constant.automatically_generated_subdir)^
            location_for_loadingsfile in
        let s=Alaskan_up_to_date_targets.loadings (root,location_for_loadingsfile)
         (dirs,tgts)
@@ -2410,7 +2410,7 @@ module Save_all=struct
     let save_printersfile (root,location_for_printersfile) printer_equipped_types=
        let init_dir=
         Subdirectory.connectable_to_subpath 
-        (Coma_constant.kept_up_to_date_but_not_registered) in
+        (Coma_constant.automatically_generated_subdir) in
        let s=Alaskan_printer_equipped_types.instructions printer_equipped_types
        and lm=Root_directory.force_join root  (init_dir^location_for_printersfile) in
        let beg_mark="(*Registered printers start here *)"
@@ -2502,7 +2502,7 @@ module Create_or_update_copied_compiler=struct
         Coma_constant.build_subdir;
         Coma_constant.exec_build_subdir;
         Coma_constant.debug_build_subdir;
-        Coma_constant.kept_up_to_date_but_not_registered;
+        Coma_constant.automatically_generated_subdir;
       ] in
     let special_files=list_of_special_files (sourcedir,destdir) in  
     let _=Image.image (

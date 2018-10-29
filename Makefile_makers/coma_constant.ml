@@ -5,7 +5,7 @@
 
 *)
 
-let kept_up_to_date_but_not_registered=
+let automatically_generated_subdir=
   Subdirectory.of_string "Kept_up_to_date_but_not_registered";;
 
 let left_out_of_updating=
@@ -34,9 +34,9 @@ let name_for_printersfile="my_printers.ml";;
 
 
 let path_for_loadingsfile=
-  (Subdirectory.connectable_to_subpath kept_up_to_date_but_not_registered)^name_for_loadingsfile;;
+  (Subdirectory.connectable_to_subpath automatically_generated_subdir)^name_for_loadingsfile;;
 let path_for_printersfile=
-  (Subdirectory.connectable_to_subpath kept_up_to_date_but_not_registered)^name_for_printersfile;;
+  (Subdirectory.connectable_to_subpath automatically_generated_subdir)^name_for_printersfile;;
 
 let up_to_date_but_not_registered_files=
     [
