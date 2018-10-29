@@ -2464,8 +2464,6 @@ module Create_or_update_copied_compiler=struct
           (sourcedir,l1) destdir in
     Prepare_dircopy_update.commands_for_update (sourcedir,destdir) main_diff;;
   
-  let file_for_backup="Country/Alaska/alaskan_backup_target_system.ml";;
-  
   let default_reps (sourcedir,destdir)=
        (* The order of the replacements is important here *)
        [
@@ -2484,24 +2482,15 @@ module Create_or_update_copied_compiler=struct
   
   let list_of_special_files (sourcedir,destdir)=
      [
-       file_for_backup,[
-                         ("let github_after_backup=ref(true)"^Double_semicolon.ds,
-                          "let github_after_backup=ref(false)"^Double_semicolon.ds)
-                       ];
+       Coma_constant.path_for_backerfile,[
+                                           ("let github_after_backup=ref(true)"^Double_semicolon.ds,
+                                            "let github_after_backup=ref(false)"^Double_semicolon.ds)
+                                         ];
        Coma_constant.path_for_loadingsfile,default_reps (sourcedir,destdir);
        Coma_constant.path_for_printersfile,default_reps (sourcedir,destdir); 
-       "Makefile_makers/usual_coma_state.ml",default_reps (sourcedir,destdir);                
+       Coma_constant.path_for_usual_state_file,default_reps (sourcedir,destdir);                
      ];;
-
-  let init_dir=
-      Subdirectory.connectable_to_subpath 
-      (Coma_constant.kept_up_to_date_but_not_registered);;
   
-  let up_to_date_but_not_registered_files=
-     [
-        Coma_constant.path_for_loadingsfile;
-        Coma_constant.path_for_printersfile;
-     ];;
   
   let ucc cs (destdir,backup_dir)=
     let sourcedir=root cs in 
