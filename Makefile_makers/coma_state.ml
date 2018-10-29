@@ -2488,7 +2488,7 @@ module Create_or_update_copied_compiler=struct
                                          ];
        Coma_constant.path_for_loadingsfile,default_reps (sourcedir,destdir);
        Coma_constant.path_for_printersfile,default_reps (sourcedir,destdir); 
-       Coma_constant.path_for_usual_state_file,default_reps (sourcedir,destdir);                
+       Coma_constant.path_for_usualstatefile,default_reps (sourcedir,destdir);                
      ];;
   
   
@@ -2503,6 +2503,8 @@ module Create_or_update_copied_compiler=struct
         Coma_constant.exec_build_subdir;
         Coma_constant.debug_build_subdir;
         Coma_constant.automatically_generated_subdir;
+        Coma_constant.backer_subdir;
+        Coma_constant.usualstate_subdir;
       ] in
     let special_files=list_of_special_files (sourcedir,destdir) in  
     let _=Image.image (
