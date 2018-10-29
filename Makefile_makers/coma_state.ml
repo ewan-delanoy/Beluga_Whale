@@ -2472,7 +2472,7 @@ module Create_or_update_copied_compiler=struct
          (Root_directory.without_trailing_slash sourcedir,
           Root_directory.without_trailing_slash destdir);
          (Root_directory.without_trailing_slash Coma_big_constant.backup_dir_for_this_world,
-          Root_directory.without_trailing_slash Coma_big_constant.backup_dir_for_next_world)
+          Root_directory.without_trailing_slash Coma_big_constant.dummy_backup_dir)
        ]  ;;
 
 

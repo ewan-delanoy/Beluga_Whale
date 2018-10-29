@@ -17,7 +17,7 @@ let backup_dir_for_this_world=
                 Root_directory.of_string 
                 "/Users/ewandelanoy/Documents/OCaml/Githubbed_ocaml";;                
 
-let backup_dir_for_next_world=
+let dummy_backup_dir=
                 Root_directory.of_string 
                 "/Users/ewandelanoy/Documents/OCaml/Dummy_directory";;  
 
