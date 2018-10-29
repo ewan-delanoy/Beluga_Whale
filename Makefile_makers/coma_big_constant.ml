@@ -21,5 +21,7 @@ let backup_dir_for_next_world=
                 Root_directory.of_string 
                 "/Users/ewandelanoy/Documents/OCaml/Dummy_directory";;  
 
-
+let third_world=
+                Root_directory.of_string 
+                "/Users/ewandelanoy/Documents/OCaml/Cherokee";;
                            
