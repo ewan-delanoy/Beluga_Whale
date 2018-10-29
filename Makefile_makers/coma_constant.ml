@@ -14,7 +14,7 @@ let left_out_of_updating=
 let old_and_hardly_reusable=
     Subdirectory.of_string "Old_and_hardly_reusable";;  
 
-let temporary=
+let temporary_subdir=
   Subdirectory.of_string "Temporary";;
 
 let githubbed_archive=

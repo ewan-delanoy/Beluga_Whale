@@ -20,7 +20,7 @@ let is_admissible s=
      [
        Coma_constant.left_out_of_updating;
        Coma_constant.old_and_hardly_reusable;
-       Coma_constant.temporary;
+       Coma_constant.temporary_subdir;
      ])
     @
     ["_build/";".vscode/"]

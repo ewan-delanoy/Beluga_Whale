@@ -1923,7 +1923,7 @@ module Target_system_creation=struct
           ("mkdir -p "^s_main_dir^"/"^(Subdirectory.without_trailing_slash s))
       ) [
            Coma_constant.automatically_generated_subdir;
-           Coma_constant.temporary;
+           Coma_constant.temporary_subdir;
         ]
       in
       let _=Unix_command.uc ("mkdir -p "^s_main_dir^"/"^(Subdirectory.connectable_to_subpath Coma_constant.build_subdir)) in
@@ -1969,7 +1969,7 @@ let select_good_files s_main_dir=
             Coma_constant.automatically_generated_subdir;
             Coma_constant.left_out_of_updating;
             Coma_constant.old_and_hardly_reusable;
-            Coma_constant.temporary;
+            Coma_constant.temporary_subdir;
             Coma_constant.githubbed_archive;
             Coma_constant.build_subdir;
             Coma_constant.debug_build_subdir;
