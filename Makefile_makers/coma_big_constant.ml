@@ -21,7 +21,7 @@ let dummy_backup_dir=
                 Root_directory.of_string 
                 "/Users/ewandelanoy/Documents/OCaml/Dummy_directory";;  
 
-let third_world=
+let dummy_world=
                 Root_directory.of_string 
                 "/Users/ewandelanoy/Documents/OCaml/Cherokee";;
                            

@@ -2468,7 +2468,7 @@ module Create_or_update_copied_compiler=struct
        (* The order of the replacements is important here *)
        [
          (Root_directory.without_trailing_slash Coma_big_constant.next_world,
-          Root_directory.without_trailing_slash Coma_big_constant.third_world);
+          Root_directory.without_trailing_slash Coma_big_constant.dummy_world);
          (Root_directory.without_trailing_slash sourcedir,
           Root_directory.without_trailing_slash destdir);
          (Root_directory.without_trailing_slash Coma_big_constant.backup_dir_for_this_world,
