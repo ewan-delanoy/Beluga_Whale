@@ -2466,22 +2466,33 @@ module Create_or_update_copied_compiler=struct
   
   let file_for_backup="Country/Alaska/alaskan_backup_target_system.ml";;
   
-  let replacements_for_special_file (sourcedir,destdir) filename=
-    if filename=file_for_backup
-    then [("let github_after_backup=ref(true)"^Double_semicolon.ds,
-          "let github_after_backup=ref(false)"^Double_semicolon.ds)]
-    else [(Root_directory.without_trailing_slash sourcedir,
+  let default_reps (sourcedir,destdir)=
+       (* The order of the replacements is important here *)
+       [
+         (Root_directory.without_trailing_slash Coma_big_constant.next_world,
+          Root_directory.without_trailing_slash Coma_big_constant.third_world);
+         (Root_directory.without_trailing_slash sourcedir,
           Root_directory.without_trailing_slash destdir);
-          "/Users/ewandelanoy/Documents/OCaml/Githubbed_ocaml",
-          "/Users/ewandelanoy/Documents/OCaml/Dummy_directory"
-          ];;
-  
-  let prepare_special_file (sourcedir,destdir) filename=
+         (Root_directory.without_trailing_slash Coma_big_constant.backup_dir_for_this_world,
+          Root_directory.without_trailing_slash Coma_big_constant.backup_dir_for_next_world)
+       ]  ;;
+
+
+  let prepare_special_file (sourcedir,destdir) (filename,reps)=
     let the_file=Absolute_path.create_file(Root_directory.join destdir filename) in
-    Replace_inside.replace_several_inside_file
-    (replacements_for_special_file (sourcedir,destdir) filename)
-    the_file;;
+    Replace_inside.replace_several_inside_file reps the_file;;
   
+  let list_of_special_files (sourcedir,destdir)=
+     [
+       file_for_backup,[
+                         ("let github_after_backup=ref(true)"^Double_semicolon.ds,
+                          "let github_after_backup=ref(false)"^Double_semicolon.ds)
+                       ];
+       Coma_constant.path_for_loadingsfile,default_reps (sourcedir,destdir);
+       Coma_constant.path_for_printersfile,default_reps (sourcedir,destdir); 
+       "Makefile_makers/usual_coma_state.ml",default_reps (sourcedir,destdir);                
+     ];;
+
   let init_dir=
       Subdirectory.connectable_to_subpath 
       (Coma_constant.kept_up_to_date_but_not_registered);;
@@ -2496,20 +2507,22 @@ module Create_or_update_copied_compiler=struct
     let sourcedir=root cs in 
     let knr=Subdirectory.without_trailing_slash(Coma_constant.kept_up_to_date_but_not_registered) in
     let s_dir=Root_directory.connectable_to_subpath destdir in 
-    let _=Unix_command.uc ("mkdir -p "^s_dir^(Subdirectory.connectable_to_subpath Coma_constant.build_subdir)) in
-    let _=Unix_command.uc ("mkdir -p "^s_dir^(Subdirectory.connectable_to_subpath Coma_constant.exec_build_subdir)) in
-    let _=Unix_command.uc ("mkdir -p "^s_dir^(Subdirectory.connectable_to_subpath Coma_constant.debug_build_subdir)) in
-    let _=Unix_command.uc ("mkdir -p "^s_dir^knr) in
     let _=Image.image (
-        fun s->Unix_command.uc("touch "^s_dir^s)
-    ) up_to_date_but_not_registered_files in
-    let _=Image.image Unix_command.uc (prepare cs destdir) in
-    let _=Image.image (prepare_special_file (sourcedir,destdir))
-      (
-        up_to_date_but_not_registered_files@
-      ["Makefile_makers/usual_coma_state.ml";file_for_backup]
-      ) 
-     in 
+       fun subdir ->
+        Unix_command.uc ("mkdir -p "^s_dir^(Subdirectory.without_trailing_slash subdir))
+    ) [
+        Coma_constant.build_subdir;
+        Coma_constant.exec_build_subdir;
+        Coma_constant.debug_build_subdir;
+        Coma_constant.kept_up_to_date_but_not_registered;
+      ] in
+    let special_files=list_of_special_files (sourcedir,destdir) in  
+    let _=Image.image (
+        fun (filepath,reps)->
+          let _=Unix_command.uc("touch "^s_dir^filepath) in 
+          prepare_special_file (sourcedir,destdir) (filepath,reps)
+    ) special_files in  
+    let _=Image.image Unix_command.uc (prepare cs destdir) in 
     let (new_mdata2,new_tgts2,preqt)=Target_system_creation.from_main_directory destdir backup_dir in 
     let _=(
         set_targets new_mdata2 new_tgts2;
