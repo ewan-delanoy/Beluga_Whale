@@ -2488,7 +2488,7 @@ module Create_or_update_copied_compiler=struct
                                          ];
        Coma_constant.path_for_loadingsfile,default_reps (sourcedir,destdir);
        Coma_constant.path_for_printersfile,default_reps (sourcedir,destdir); 
-       Coma_constant.path_for_usualstatefile,default_reps (sourcedir,destdir);                
+       Coma_constant.path_for_parametersfile,default_reps (sourcedir,destdir);                
      ];;
   
   
