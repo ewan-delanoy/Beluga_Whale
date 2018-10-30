@@ -2504,7 +2504,7 @@ module Create_or_update_copied_compiler=struct
         Coma_constant.debug_build_subdir;
         Coma_constant.automatically_generated_subdir;
         Coma_constant.backer_subdir;
-        Coma_constant.usualstate_subdir;
+        Coma_constant.parameters_subdir;
       ] in
     let special_files=list_of_special_files (sourcedir,destdir) in  
     let _=Image.image (
