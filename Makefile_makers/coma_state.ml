@@ -2507,12 +2507,13 @@ module Create_or_update_copied_compiler=struct
         Coma_constant.parameters_subdir;
       ] in
     let special_files=list_of_special_files (sourcedir,destdir) in  
+    (* remember to modify the special files AFTER copying every file ! *)
+    let _=Image.image Unix_command.uc (prepare cs destdir) in 
     let _=Image.image (
         fun (filepath,reps)->
           let _=Unix_command.uc("touch "^s_dir^filepath) in 
           prepare_special_file (sourcedir,destdir) (filepath,reps)
     ) special_files in  
-    let _=Image.image Unix_command.uc (prepare cs destdir) in 
     let (new_mdata2,new_tgts2,preqt)=Target_system_creation.from_main_directory destdir backup_dir in 
     let _=(
         set_targets new_mdata2 new_tgts2;
