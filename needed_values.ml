@@ -6,8 +6,6 @@
 
 
 
-let backup_root=Coma_big_constant.backup_dir_for_this_world;;
-
 let hi = List.length ;; 
 
 let image = Image.image ;;
@@ -16,6 +14,6 @@ let initialize_toplevel=German_wrapper.initialize_if_empty;;
 
 let ofo=Ordered.forget_order;;
 
-let root=Coma_big_constant.this_world;;
+let ucc=Usual_coma_state.ucc;;   
 
-let ucs=Usual_coma_state.main_ref;;           
+let ucs=Usual_coma_state.main_ref;;   
