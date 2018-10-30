@@ -82,4 +82,4 @@ let absolute_path_of_string0 s0=
   else raise(Inexistent_file(s));;
   
  let of_string s=
-   Capitalize_directory_names.cdn(absolute_path_of_string1 s);;           
+   (* Capitalize_directory_names.cdn *)(absolute_path_of_string1 s);;           
