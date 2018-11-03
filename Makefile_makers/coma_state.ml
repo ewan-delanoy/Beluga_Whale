@@ -496,8 +496,7 @@ let rename_module_on_monitored_modules root_dir cs old_name new_name=
   let old_mname=Half_dressed_module.naked_module old_name
   and new_mname=Half_dressed_module.naked_module new_hm
   in
-  let changer=Look_for_module_names.change_module_name_in_file
-  old_mname new_mname in
+  let changer=Look_for_module_names.change_module_name_in_file old_mname new_mname in
   let separated_acolytes=Option.filter_and_unpack(
     fun k->
      if List.mem old_mname (ancestors_at_idx cs k)
@@ -944,18 +943,19 @@ let register_mlx_file_on_monitored_modules cs mlx_file =
           if (not(List.mem Ocaml_ending.mli (ending::edgs)))
           then raise(Bad_pair(mlx_file,List.hd edgs))
           else 
-          let (hm,old_pr_end,old_mlir,prmt,mlimt,libned,dirfath,allanc,dirned,is_updated)=complete_info cs mlx_file in
-          let nm=Half_dressed_module.naked_module hm in
-          let (pr_end,mlir)=(
-            if ending=Ocaml_ending.mli
-            then (old_pr_end,true)
-            else (ending,old_mlir) 
-          ) in
-          let new_dt=(hm,pr_end,mlir,prmt,mlimt,libned,dirfath,allanc,dirned,false) in
-          if ending<>Ocaml_ending.ml
-          then let _=Coma_state_field.set_in_each cs idx new_dt in         
+          if ending = Ocaml_ending.mli
+          then let old_pr_end = List.hd edgs in
+               let old_mlx_file =
+                Mlx_ended_absolute_path.join hm old_pr_end in
+              let (hm,_,old_mlir,prmt,mlimt,libned,dirfath,allanc,dirned,is_updated)=
+                 complete_info cs old_mlx_file in
+               let new_mlimt = md_compute_modification_time hm ending in
+               let new_dt=(hm,old_pr_end,true,prmt,new_mlimt,libned,dirfath,allanc,dirned,false) in
+               let _=Coma_state_field.set_in_each cs idx new_dt in         
                cs
-          else 
+          else
+          let new_dt=complete_id_during_new_module_registration cs mlx_file in 
+          let (_,_,_,_,_,libned,dirfath,allanc,dirned,_)=new_dt in
           let temp3=List.rev(dirfath) in
           if temp3=[]
           then let _=Coma_state_field.set_in_each cs idx new_dt in         
@@ -963,6 +963,7 @@ let register_mlx_file_on_monitored_modules cs mlx_file =
           else  
           let last_father=List.hd(temp3) in
           let last_father_idx=Small_array.leftmost_index_of_in last_father (modules cs) in
+          let nm=Half_dressed_module.naked_module hm in 
           let _=
             (
               for k=last_father_idx+1 to n 
@@ -1311,8 +1312,9 @@ let ingredients_for_cmio cs hm=
     let opt_idx=seek_module_index cs nm in
     if opt_idx=None then raise(Unregistered_cmio(hm)) else 
     let idx=Option.unpack opt_idx in
-    (targets_from_ancestors cs idx)@
+    (targets_from_ancestors cs idx)@ 
     (immediate_ingredients_for_cmio cs idx hm);;
+
 
 let ingredients_for_usual_element cs hm=
     let nm=Half_dressed_module.naked_module hm in
@@ -1556,7 +1558,6 @@ module Ocaml_target_making=struct
     if Ocaml_target.test_target_existence dir tgt
     then List.mem tgt tgts
     else false;;
-
 
   let unit_make is_an_ending_or_not dir (bowl,(mdata,tgts,rejected_ones)) tgt=
     if (not bowl)
@@ -1876,12 +1877,7 @@ let rec iterator x=
    let (vdata,failures,yet_untreated)=x in
    match yet_untreated with
       []->(failures,vdata)
-      |mlx::others->
-      (
-        match mlx_file vdata mlx with
-        None->iterator(pusher x)
-        |Some(nfs)->iterator(pusher x)
-      );;   
+      |mlx::others->iterator(pusher x);;   
 
 end;;
 

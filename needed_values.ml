@@ -10,7 +10,7 @@ let hi = List.length ;;
 
 let image = Image.image ;;
 
-let initialize_toplevel=German_wrapper.initialize_if_empty;;
+let initialize_toplevel=Usual_coma_state.initialize_if_empty;;
 
 let ofo=Ordered.forget_order;;
 
