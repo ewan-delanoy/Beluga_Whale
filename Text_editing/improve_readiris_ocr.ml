@@ -35,7 +35,19 @@ let replace_fixed_length_pattern_with_constant_in_file
     pattern_tester pattern_length replacement old_text in 
     Io.overwrite_with argument_file new_text;; 
 
-  
+let modify_words_in_string f s=
+  let temp1=Str.full_split (Str.regexp"[ \n\r\t]+")  s in 
+  let temp2=Image.image (function
+     Str.Delim(delim)->delim
+     |Str.Text(text)->f text
+  ) temp1 in 
+  String.concat "" temp2;;
+
+let  modify_words_in_file f argument_file=
+    let old_text=Io.read_whole_file argument_file in 
+    let new_text=modify_words_in_string f old_text in 
+    Io.overwrite_with argument_file new_text;; 
+
 (*
 
 replace_fixed_length_pattern_with_constant_in_string
@@ -47,6 +59,23 @@ replace_fixed_length_pattern_with_constant_in_string
      1
       " ;" 
         "abc;def ;gh ;ijk ;lmn";;
+
+let is_illegal s=
+  let n=String.length(s) in 
+  let tempf1=(fun l k->
+    List.mem (Strung.get s k) l
+  ) in 
+  let tempf2=(fun l i j->List.exists(tempf1 l)(Ennig.ennig i j)) in 
+  if tempf1 Charset.lowercase_letters 1
+  then tempf2 Charset.uppercase_letters 2 n 
+  else (tempf2 Charset.lowercase_letters 2 n)&&
+       (tempf2 Charset.uppercase_letters 2 n);;
+
+let make_legal s= 
+  if is_illegal s then String.lowercase_ascii s else s;;
+
+modify_words_in_string make_legal "aBc\t\nDe\n\t\tFGh klmp";;
+  
 
 
 *)
