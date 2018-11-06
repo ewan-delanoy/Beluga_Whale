@@ -1387,7 +1387,7 @@ module Command_for_ocaml_target=struct
             [
               "ocamlyacc "^s_fhm^".mly"
             ];;  
-  
+
   let command_for_cmi dir cs hm=
     let nm=Half_dressed_module.naked_module hm in
     let opt_idx=seek_module_index cs nm in
@@ -1410,7 +1410,7 @@ module Command_for_ocaml_target=struct
                    So the modulesystem manager must treat it as though it didn't
                    exist. We temporarily rename it so that ocamlc will ignore it.
                   *)
-                  let dummy_mli=s_root^"uvueaoqhkt.mli" in
+                  let dummy_mli=s_root^"uvueaoqhkt" in
                   [
                    "mv "^full_mli^" "^dummy_mli;
                    central_cmd;
@@ -1431,11 +1431,32 @@ module Command_for_ocaml_target=struct
     let s_root=Root_directory.connectable_to_subpath(dir) in
     let s_fhm=s_root^s_hm in
     let dirs_and_libs=needed_dirs_and_libs_in_command false cs idx in
+    let mli_reg=check_ending_in_at_idx Ocaml_ending.mli cs idx in 
+    let full_mli=s_fhm^".mli" in
+    let central_cmds=
     [ 
       "ocamlc -bin-annot "^dirs_and_libs^" -o "^s_fhm^".cmo -c "^s_fhm^".ml";
       "mv "^s_fhm^".cm* "^s_root^(Subdirectory.connectable_to_subpath Coma_constant.build_subdir)
-    ];;
-  
+    ] in 
+    if (not mli_reg) &&(Sys.file_exists(full_mli))
+    then 
+          (* 
+                   in this situation the mli file exists but is not registered.
+                   So the modulesystem manager must treat it as though it didn't
+                   exist. We temporarily rename it so that ocamlc will ignore it.
+          *)
+                  let dummy_mli=s_root^"uvueaoqhkt" in
+                  [
+                   "mv "^full_mli^" "^dummy_mli
+                  ]
+                  @ 
+                   central_cmds
+                  @ 
+                  [ 
+                   "mv "^dummy_mli^" "^full_mli
+                  ] 
+    else central_cmds;; 
+ 
   let command_for_dcmo dir cs hm=
     let nm=Half_dressed_module.naked_module hm in
     let opt_idx=seek_module_index cs nm in
@@ -2099,20 +2120,20 @@ let delchacre_from_scratch (source_dir,dir_for_backup) mdata=
 
 
 
-let refresh x=
+let refresh cs=
       let (new_mdata,new_tgts,new_ptypes)=
         Target_system_creation.from_main_directory 
-             (root x)
-             (backup_dir x)
+             (root cs)
+             (backup_dir cs)
          in 
         let new_dirs=compute_subdirectories_list new_mdata in
-        let new_diff=delchacre_from_scratch (root x,backup_dir x) new_mdata in
+        let new_diff=delchacre_from_scratch (root cs,backup_dir cs) new_mdata in
         let _=
         (
-          Coma_state_field.copy_mutables_from x new_mdata;
-          set_directories x new_dirs;
-          set_targets x new_tgts;
-          set_preq_types x new_ptypes;
+          Coma_state_field.copy_mutables_from cs new_mdata;
+          set_directories cs new_dirs;
+          set_targets cs new_tgts;
+          set_preq_types cs new_ptypes;
          ) in
          new_diff;; 
 
