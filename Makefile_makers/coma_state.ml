@@ -1322,7 +1322,7 @@ let ingredients_for_usual_element cs hm=
     if opt_idx=None then raise(Unregistered_element(hm)) else 
     let idx=Option.unpack opt_idx in
     let mli_reg=check_ending_in_at_idx Ocaml_ending.mli cs idx
-    and ml_reg=check_ending_in_at_idx Ocaml_ending.mli cs idx in
+    and ml_reg=check_ending_in_at_idx Ocaml_ending.ml cs idx in
     if mli_reg
     then if ml_reg
          then (ingredients_for_cmio cs hm)@[Ocaml_target.cmi hm;Ocaml_target.cmo hm]
