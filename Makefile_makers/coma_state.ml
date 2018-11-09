@@ -1277,45 +1277,6 @@ module Shortened_ingredients_for_ocaml_target=struct
 exception Unregistered_cmio  of Half_dressed_module.t;;
 exception Unregistered_element  of Half_dressed_module.t;;
   
-let targets_from_ancestor_data cs idx=
-    let hm=hm_at_idx cs idx in
-    if check_ending_in_at_idx Ocaml_ending.mll cs idx
-    then [Ocaml_target.ml_from_mll hm;Ocaml_target.cmo hm]
-    else 
-    if check_ending_in_at_idx Ocaml_ending.mly cs idx
-    then [Ocaml_target.ml_from_mly hm;Ocaml_target.cmo hm]
-    else
-    if check_ending_in_at_idx Ocaml_ending.ml cs idx
-    then [Ocaml_target.cmo hm]
-    else [Ocaml_target.cmi hm];;  
-  
-let targets_from_ancestors cs idx=
-       let ancestors=ancestors_at_idx cs idx in
-       let temp1=Image.image (fun nm2->
-              let idx2=find_module_index cs nm2 in
-              targets_from_ancestor_data cs idx2
-            ) ancestors in
-       Preserve_initial_ordering.preserve_initial_ordering temp1;;
-
-
-let immediate_ingredients_for_cmio cs idx hm=
-      if check_ending_in_at_idx Ocaml_ending.mll cs idx
-      then [Ocaml_target.ml_from_mll hm]
-      else 
-      if check_ending_in_at_idx Ocaml_ending.mly cs idx
-      then [Ocaml_target.ml_from_mly hm]
-      else [];; 
-
-
-let ingredients_for_cmio cs hm=
-    let nm=Half_dressed_module.naked_module hm in
-    let opt_idx=seek_module_index cs nm in
-    if opt_idx=None then raise(Unregistered_cmio(hm)) else 
-    let idx=Option.unpack opt_idx in
-    (targets_from_ancestors cs idx)@ 
-    (immediate_ingredients_for_cmio cs idx hm);;
-
-
 let ingredients_for_usual_element cs hm=
     let nm=Half_dressed_module.naked_module hm in
     let opt_idx=seek_module_index cs nm in
@@ -1323,11 +1284,19 @@ let ingredients_for_usual_element cs hm=
     let idx=Option.unpack opt_idx in
     let mli_reg=check_ending_in_at_idx Ocaml_ending.mli cs idx
     and ml_reg=check_ending_in_at_idx Ocaml_ending.ml cs idx in
+    let preliminaries = (
+      if check_ending_in_at_idx Ocaml_ending.mll cs idx
+      then [Ocaml_target.ml_from_mll hm]
+      else 
+      if check_ending_in_at_idx Ocaml_ending.mly cs idx
+      then [Ocaml_target.ml_from_mly hm]
+      else []
+    ) in 
     if mli_reg
     then if ml_reg
-         then (ingredients_for_cmio cs hm)@[Ocaml_target.cmi hm;Ocaml_target.cmo hm]
-         else (ingredients_for_cmio cs hm)@[Ocaml_target.cmi hm]
-    else (ingredients_for_cmio cs hm)@[Ocaml_target.cmo hm];;
+         then preliminaries@[Ocaml_target.cmi hm;Ocaml_target.cmo hm]
+         else preliminaries@[Ocaml_target.cmi hm]
+    else preliminaries@[Ocaml_target.cmo hm];;
 
 
 
