@@ -1525,7 +1525,13 @@ module Command_for_ocaml_target=struct
    |Ocaml_target.EXECUTABLE(hm)->command_for_executable dir cs hm
    |Ocaml_target.DEBUGGABLE(hm)->command_for_debuggable dir cs hm;;
      
-  
+let command_for_module_separate_compilation cs hm=
+    let dir = root cs in 
+    let temp1=Shortened_ingredients_for_ocaml_target.ingredients_for_usual_element 
+        cs hm in 
+    let temp2=Image.image (command_for_ocaml_target dir cs) temp1 in 
+    List.flatten temp2;;
+      
    
   
 
