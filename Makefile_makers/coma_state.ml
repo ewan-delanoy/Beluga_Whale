@@ -1647,7 +1647,34 @@ let pusher_for_full_compilation dir (successful_ones,to_be_treated,ts)=
     |_->iterator_for_full_compilation dir 
      (pusher_for_full_compilation dir (successful_ones,to_be_treated,ts));;
   
-    
+let rec helper_for_feydeau  cs (rejected,treated,to_be_treated)=
+     match to_be_treated with 
+     []->(rejected,List.rev treated)
+     |a_module::other_modules->
+       let cmds = Command_for_ocaml_target.command_for_module_separate_compilation cs a_module in 
+       if Unix_command.conditional_multiple_uc cmds 
+       then let nm=Half_dressed_module.naked_module a_module in 
+            let idx=find_module_index cs nm in 
+            let _=set_product_up_to_date_at_idx cs idx true in 
+            helper_for_feydeau cs (rejected,a_module::treated,other_modules)
+       else let nm=Half_dressed_module.naked_module a_module in 
+            let (rejected_siblings,survivors)=List.partition
+           (
+              fun hm2->
+                let nm2=Half_dressed_module.naked_module hm2 in 
+                let idx2=find_module_index cs nm2 in 
+                List.mem nm (ancestors_at_idx cs idx2)
+           ) other_modules in 
+           let newly_rejected = a_module::rejected_siblings in 
+           let _=List.iter(
+              fun hm3->
+                let nm3=Half_dressed_module.naked_module hm3 in 
+                let idx3=find_module_index cs nm3 in 
+                set_product_up_to_date_at_idx cs idx3 false
+           ) newly_rejected in 
+           helper_for_feydeau cs 
+           (rejected@newly_rejected,treated,survivors)
+       ;;    
   
    
 let feydeau old_mdata=
