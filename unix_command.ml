@@ -43,7 +43,7 @@ let uc s=
 let rec conditional_multiple_uc commands=match commands with
   []->true
   |cmd1::other_commands ->
-    if (uc cmd1)<>0
+    if (uc cmd1)=0
     then conditional_multiple_uc other_commands 
     else false;;
            
