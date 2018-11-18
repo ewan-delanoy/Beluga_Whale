@@ -4,9 +4,8 @@
 #use"alternative_global_replace.ml";;
 
 The my_global_replace is a replacement for Ocaml's Str.global_replace which has
-the disadvantage of applying certain transforms to the replaced substring.
+the disadvantage of applying certain transforms to the replacement string.
 
-An exception is raised if the occurrences of the replaced substring are not disjoint.
 
 *)
 
@@ -28,13 +27,6 @@ let my_global_replace (a,b) s=
   if na=1 then single_char_special_case (String.get a 0,b) s else
   let indices=Substring.occurrences_of_in a s in
   if indices=[] then s else
-  let successive_indices=Listennou.universal_delta_list indices in 
-  let possible_failure=Option.seek (fun (i,j)->j<i+na) successive_indices in 
-  if possible_failure<>None
-  then let (i0,j0)=Option.unpack possible_failure in 
-       let culprit=Cull_string.interval s i0 (j0+na-1) in 
-       raise(Ambiguity(culprit))
-  else 
   let m=List.length(indices)+1 in
   let pattern_appears_left=((List.nth indices 0)=1)
   and pattern_appears_right=((List.nth indices (m-2))=n+1-na) in
@@ -47,8 +39,10 @@ let my_global_replace (a,b) s=
   )
   in
   let unchanged_intervals=Option.filter_and_unpack coords (Ennig.ennig 1 m) in
-  let unchanged_substrings=Image.image (fun (x,y)->
-    if x>y then "" else Cull_string.interval s x y) unchanged_intervals in
+  if List.exists (fun (x,y)->x>y) unchanged_intervals
+  then raise(Ambiguity(a)) 
+  else 
+  let unchanged_substrings=Image.image (fun (x,y)->Cull_string.interval s x y) unchanged_intervals in
   let draft=String.concat b unchanged_substrings in
   let left_padding=(if pattern_appears_left then b else "")
   and right_padding=(if pattern_appears_right then b else "") in
@@ -61,8 +55,6 @@ my_global_replace ("ab","cd") "12345ab6ab78cd91234ab679ab";;
 my_global_replace ("1111","") "abc1111111111def";;
 my_global_replace ("ab","cd") "xyz";;
 my_global_replace ("a","b") "1aa2";; 
-my_global_replace ("ab","cd") "12ababab34";; 
-my_global_replace ("aba","cd") "12ababab34";; 
 
 *)  
   

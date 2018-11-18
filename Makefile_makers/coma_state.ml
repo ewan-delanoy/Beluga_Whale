@@ -103,12 +103,16 @@ let check_for_single_ending_at_idx cs idx=
   else true ;;
 
 
-
-    
-
-
-
 let size cs = Small_array.size (modules cs);;      
+
+let up_to_date_hms cs =
+   let n = size cs in 
+   Option.filter_and_unpack (
+     fun idx->
+       if product_up_to_date_at_idx cs idx 
+       then Some(hm_at_idx cs idx)
+       else None
+   )(Ennig.ennig 1 n);;
 
 module Private=struct
 
@@ -1647,89 +1651,66 @@ let pusher_for_full_compilation dir (successful_ones,to_be_treated,ts)=
     |_->iterator_for_full_compilation dir 
      (pusher_for_full_compilation dir (successful_ones,to_be_treated,ts));;
   
+let ref_for_faurisson_set_product_up_to_date_at_idx = ref[];;
+
+let faurisson_set_product_up_to_date_at_idx cs idx vwl=
+  (
+     set_product_up_to_date_at_idx cs idx vwl;
+     ref_for_faurisson_set_product_up_to_date_at_idx:=
+     (idx,vwl)::(!ref_for_faurisson_set_product_up_to_date_at_idx);
+  );;
+
 let rec helper_for_feydeau  cs (rejected,treated,to_be_treated)=
      match to_be_treated with 
      []->(rejected,List.rev treated)
-     |a_module::other_modules->
-       let cmds = Command_for_ocaml_target.command_for_module_separate_compilation cs a_module in 
+     |pair::other_pairs->
+       let (idx,hm)=pair in
+       let cmds = Command_for_ocaml_target.command_for_module_separate_compilation cs hm in 
        if Unix_command.conditional_multiple_uc cmds 
-       then let nm=Half_dressed_module.naked_module a_module in 
-            let idx=find_module_index cs nm in 
-            let _=set_product_up_to_date_at_idx cs idx true in 
-            helper_for_feydeau cs (rejected,a_module::treated,other_modules)
-       else let nm=Half_dressed_module.naked_module a_module in 
+       then let _=faurisson_set_product_up_to_date_at_idx cs idx true in 
+            helper_for_feydeau cs (rejected,pair::treated,other_pairs)
+       else let nm=Half_dressed_module.naked_module hm in 
             let (rejected_siblings,survivors)=List.partition
            (
-              fun hm2->
-                let nm2=Half_dressed_module.naked_module hm2 in 
-                let idx2=find_module_index cs nm2 in 
+              fun (idx2,hm2)->
                 List.mem nm (ancestors_at_idx cs idx2)
-           ) other_modules in 
-           let newly_rejected = a_module::rejected_siblings in 
+           ) other_pairs in 
+           let newly_rejected = pair::rejected_siblings in 
            let _=List.iter(
-              fun hm3->
-                let nm3=Half_dressed_module.naked_module hm3 in 
-                let idx3=find_module_index cs nm3 in 
-                set_product_up_to_date_at_idx cs idx3 false
+              fun (idx3,hm3)->
+                faurisson_set_product_up_to_date_at_idx cs idx3 false
            ) newly_rejected in 
-           helper_for_feydeau cs 
-           (rejected@newly_rejected,treated,survivors)
-       ;;    
+           helper_for_feydeau cs (rejected@newly_rejected,treated,survivors) ;;
   
-   
-let feydeau old_mdata=
-    let dir=root old_mdata 
-    and old_tgts=targets old_mdata in
-    let l=everyone_except_the_debugger old_mdata in
-    let ts=(old_mdata,old_tgts,[]) in
-    let temp1=ingr_for_top old_mdata "ecaml" l in
-    let (successful_ones,ts2)=iterator_for_full_compilation dir ([],temp1,ts) in
-    ts2;;
-  
-let make_final_target mode opt_argument cs=
-    match   mode with
-     Compilation_mode_t.Usual->(false,feydeau cs)
-    |Compilation_mode_t.Debug->
-        let dbg=Coma_constant.name_for_debugged_module in
-        let rdir=compute_subdirectories_list cs in
-        let ap=Find_suitable_ending.find_file_location (root cs) rdir 
-         (dbg^".ml") in
-        let hm=Half_dressed_module.of_path_and_root ap (root cs) in
-        let cs2=recompute_module_info cs hm in
-        let old_tgts=targets cs in
-        let tgt=Ocaml_target.debuggable hm in
-        castle (root cs) (cs2,old_tgts,[]) tgt
-    |Compilation_mode_t.Executable->
-        let hm=Option.unpack opt_argument in
-        let tgt=Ocaml_target.EXECUTABLE hm in 
-        let _=castle (root cs) (cs,targets cs,[]) tgt in
-        let l_cmd=Command_for_ocaml_target.command_for_ocaml_target
-         (root cs) cs tgt in
-        let _=Image.image Unix_command.hardcore_uc l_cmd in
-        (false,(cs,[],[]));; 
-  
+let ref_for_feydeau = ref [];;
+
+let feydeau cs l=
+  let _=(ref_for_feydeau:=l::(!ref_for_feydeau)) in 
+  let temp1=Image.image (fun idx->(idx,hm_at_idx cs idx)) l in 
+  helper_for_feydeau cs ([],[],temp1);; 
+
+
 end;;  
 
 
 let recompile cs=
-     let old_tgts=targets cs in
      let ((_,nms_to_be_updated),short_paths)=
         recompile_on_monitored_modules false cs in
      if nms_to_be_updated=[] then (false,[]) else
-     let new_dirs=compute_subdirectories_list cs 
-     and new_tgts1=Ocaml_target.still_up_to_date_targets nms_to_be_updated old_tgts in
-     let checker=Ocaml_target.test_target_existence (root cs) in
-     let new_tgts=List.filter checker new_tgts1 in
-     let _=(set_targets cs new_tgts) in
-     let (_,(_,new_tgts2,rejected_ones2))=
-       Ocaml_target_making.make_final_target
-       Compilation_mode_t.Usual None cs  in
+     let new_dirs=compute_subdirectories_list cs  in
+     let indexed_nms=Image.image(
+       fun nm->
+       let idx=find_module_index cs nm in 
+       (idx,hm_at_idx cs idx)
+     ) nms_to_be_updated in 
+     let (rejected_pairs,accepted_pairs)=
+       Ocaml_target_making.helper_for_feydeau cs ([],[],indexed_nms) in 
+     let rejected_hms=Image.image snd rejected_pairs in  
       let new_preqt=Image.image(
-        fun (hm,_)->(hm,not(List.mem hm rejected_ones2))
+        fun (hm,_)->(hm,not(List.mem hm rejected_hms))
       )  (preq_types cs) in   
      let _=(
         set_directories cs new_dirs;
-        set_targets cs new_tgts2;
         set_preq_types cs new_preqt;
      )  in
     (true,short_paths);;       
@@ -1756,19 +1737,25 @@ let backup x diff opt=
   Alaskan_backup_target_system.backup 
   (root x,backup_dir x) diff opt;;
 
-  let unregister_mlx_file_on_targets root_dir (old_cs,old_tgts) mlx=
-    let hm=Mlx_ended_absolute_path.half_dressed_core mlx in
-    let new_cs=unregister_mlx_file_on_monitored_modules old_cs mlx in
-    let new_dirs=compute_subdirectories_list new_cs
-    and new_tgts=List.filter (fun tgt->
-       match Ocaml_target.main_module tgt with
-       None->false |Some(hm2)->hm2<>hm
-    ) old_tgts in
-    let _=(set_targets new_cs new_tgts) in
-    let (_,(new_cs2,new_tgts2,_))=
-       Ocaml_target_making.make_final_target
-       Compilation_mode_t.Usual None new_cs  in
-    (new_cs2,new_dirs,new_tgts2);;   
+  let unregister_mlx_file_on_targets root_dir (cs,old_tgts) mlx=
+    let hm=Mlx_ended_absolute_path.half_dressed_core mlx in 
+    let nm=Half_dressed_module.naked_module hm in 
+    let idx=find_module_index cs nm in
+    let n=size cs in 
+    let sibling_indices=List.filter(
+        fun jdx->
+         List.mem nm (ancestors_at_idx cs jdx)
+    )(Ennig.ennig idx (n+1)) in 
+    let was_lonely=
+      (List.length(registered_endings_at_idx cs idx)=1) in 
+    let _=set_product_up_to_date_at_idx cs idx false in 
+    let new_cs=unregister_mlx_file_on_monitored_modules cs mlx in
+    let new_dirs=compute_subdirectories_list new_cs in
+    
+    let _=(if was_lonely 
+           then ([],[]) 
+           else Ocaml_target_making.feydeau cs (idx::sibling_indices) ) in 
+    (cs,new_dirs,[]);;   
 
 exception FileWithDependencies of 
 Mlx_ended_absolute_path.t*(Naked_module_t.t list);;
@@ -1816,16 +1803,10 @@ let test_for_non_obsolescence (hm,short_paths) tgt=
       );;    
 
 
-let on_targets root_dir (old_cs,old_tgts) hm=
-    let (new_cs,short_paths)=unregister_module_on_monitored_modules  old_cs hm in
-    let new_dirs=compute_subdirectories_list new_cs 
-    and new_tgts=List.filter 
-     (test_for_non_obsolescence (hm,short_paths) ) old_tgts in
-    let _=(set_targets new_cs new_tgts) in
-    let (_,(new_cs2,new_tgts2,_))=
-        Ocaml_target_making.make_final_target
-        Compilation_mode_t.Usual None new_cs  in 
-     ((new_cs2,new_dirs,new_tgts2),short_paths);;   
+let on_targets root_dir (cs,old_tgts) hm=
+    let (new_cs,short_paths)=unregister_module_on_monitored_modules  cs hm in
+    let new_dirs=compute_subdirectories_list new_cs  in
+     ((cs,new_dirs,[]),short_paths);;   
      
    
 
@@ -2100,11 +2081,11 @@ let from_main_directory dir backup_dir =
         let temp3=Private.compute_dependencies temp2 in
         let (failures,mdata1)=Private.from_prepared_list dir backup_dir temp3 in
         let pre_preqt=printer_equipped_types_from_data mdata1 in
-        let (_,(new_mdata2,new_tgts2,rejected_ones2))=
-           Ocaml_target_making.make_final_target
-           Compilation_mode_t.Usual None mdata1  in
-       let preqt=Image.image (fun hm->(hm,not(List.mem hm rejected_ones2))) pre_preqt in 
-       (new_mdata2,new_tgts2,preqt);;
+        let n=size mdata1 in 
+        let (rejected_pairs,_)=Ocaml_target_making.feydeau mdata1 (Ennig.ennig 1 n) in
+        let rejected_hms=Image.image snd rejected_pairs in 
+       let preqt=Image.image (fun hm->(hm,not(List.mem hm rejected_hms))) pre_preqt in 
+       (mdata1,[],preqt);;
     
     
 
@@ -2141,96 +2122,43 @@ let refresh cs=
 
 module Register_mlx_file=struct
 
-let on_targets (old_mdata,old_dirs,old_tgts) mlx=
+let on_targets (cs,old_dirs,old_tgts) mlx=
     let hm=Mlx_ended_absolute_path.half_dressed_core mlx in
     let new_dir=Half_dressed_module.subdirectory hm in
-   let new_mdata=register_mlx_file_on_monitored_modules old_mdata mlx in
+   let _=register_mlx_file_on_monitored_modules cs mlx in
    let new_dirs=
    (if List.mem new_dir old_dirs then old_dirs else old_dirs@[new_dir] )
-   and new_tgts=
-   (*
-         The only outdated targets are the targets 
-         corresponding to an identical module
-         (for example when a mll or mly is added to
-         an already registered ml) 
-          *)
-         List.filter (
-          fun tgt->match Ocaml_target.main_module tgt with
-                   None->true
-                   |Some(hm2)->hm2<>hm
-         ) old_tgts
     in
-    (new_mdata,new_dirs,new_tgts);; 
-   
-
-
+    let nm=Half_dressed_module.naked_module hm in 
+    let idx=find_module_index cs nm in 
+    let _=Ocaml_target_making.feydeau cs [idx] in 
+    (cs,new_dirs,[]);; 
+  
 
 end;;  
 
 
 let register_mlx_file cs mlx=
-          let (new_cs,new_dirs,new_tgts)= 
+          let (_,new_dirs,_)= 
           Register_mlx_file.on_targets 
-           (cs,directories cs,targets cs) mlx in
-         let _=(set_targets new_cs new_tgts) in
-         let (_,(_,new_tgts2,_))=
-             Ocaml_target_making.make_final_target
-             Compilation_mode_t.Usual None new_cs  in     
-                
-             (
+           (cs,directories cs,targets cs) mlx in   
+            (
               set_directories cs new_dirs;
-              set_targets cs new_tgts2;   
-              ) ;;             
+            ) ;;             
 
-let relocate_module_on_targets root_dir (old_cs,old_tgts) old_name new_subdir= 
-  let untouched_tgts=List.filter
-   (fun tgt->not(Ingredients_for_ocaml_target.module_dependency_for_ocaml_target
-   old_cs [old_name] tgt)&&(Ocaml_target.main_module(tgt)<>Some(old_name)) ) old_tgts in
+let relocate_module_on_targets root_dir (cs,old_tgts) old_name new_subdir= 
   let (new_cs,(old_files,new_files))=
-    relocate_module_on_monitored_modules root_dir old_cs old_name new_subdir in
-  let _=(set_targets new_cs untouched_tgts) in
-  let (_,(new_cs2,new_tgts2,_))=
-        Ocaml_target_making.make_final_target
-        Compilation_mode_t.Usual None new_cs  in     
-  ((new_cs2,new_tgts2),(old_files,new_files));;   
+    relocate_module_on_monitored_modules root_dir cs old_name new_subdir in   
+  ((cs,[]),(old_files,new_files));;   
  
-
-  let register_mlx_file x mlx=
-    let (new_cs,new_dirs,new_tgts)= 
-    Register_mlx_file.on_targets 
-     (x,directories x,targets x) mlx in
-   let _=(set_targets new_cs new_tgts) in
-   let (_,(_,new_tgts2,_))=
-       Ocaml_target_making.make_final_target
-       Compilation_mode_t.Usual None new_cs  in     
-          
-       (
-        set_directories x new_dirs;
-        set_targets x new_tgts2;   
-        ) ;;             
-
-let relocate_module_on_targets root_dir (old_cs,old_tgts) old_name new_subdir= 
-  let untouched_tgts=List.filter
-  (fun tgt->not(Ingredients_for_ocaml_target.module_dependency_for_ocaml_target
-  old_cs [old_name] tgt)&&(Ocaml_target.main_module(tgt)<>Some(old_name)) ) old_tgts in
-  let (new_cs,(old_files,new_files))=
-  relocate_module_on_monitored_modules root_dir old_cs old_name new_subdir in
-  let _=(set_targets new_cs untouched_tgts) in
-  let (_,(new_cs2,new_tgts2,_))=
-    Ocaml_target_making.make_final_target
-    Compilation_mode_t.Usual None new_cs  in     
-  ((new_cs2,new_tgts2),(old_files,new_files));;   
-
 
 
 let relocate_module x old_name new_subdir=
-  let ((_,new_tgts),(old_files,new_files))=
+  let _=
     relocate_module_on_targets (root x)
        (x,targets x) 
        old_name new_subdir in
-     (
-      set_targets x new_tgts; 
-     );;    
+     ();;    
 
 let rename_directory x (old_subdir,new_subdirname)=
       let _=Rename_endsubdirectory.in_unix_world 
@@ -2252,36 +2180,36 @@ let rename_directory x (old_subdir,new_subdirname)=
           set_preq_types x new_peqt;  
          );;   
       
-let rename_module_on_targets root_dir (old_cs,old_tgts) old_name new_name= 
-  let untouched_tgts=List.filter
-   (fun tgt->not(Ingredients_for_ocaml_target.module_dependency_for_ocaml_target
-   old_cs [old_name] tgt)&&(Ocaml_target.main_module(tgt)<>Some(old_name)) ) old_tgts in
+let rename_module_on_targets root_dir (cs,old_tgts) old_name new_name= 
+  let old_nm=Half_dressed_module.naked_module old_name in 
+  let idx=find_module_index cs old_nm in 
+  let n=size cs in 
+  let sibling_indices=List.filter(
+        fun jdx->
+         List.mem old_nm (ancestors_at_idx cs jdx)
+    )(Ennig.ennig idx (n+1)) in 
   let (new_cs,(old_files,new_files))=
-     rename_module_on_monitored_modules root_dir old_cs old_name new_name in
-  let _=(set_targets new_cs untouched_tgts) in
-  let (_,(new_cs2,new_tgts2,_))=
-       Ocaml_target_making.make_final_target
-       Compilation_mode_t.Usual None new_cs  in
-  ((new_cs2,new_tgts2),(old_files,new_files));;   
+     rename_module_on_monitored_modules root_dir cs old_name new_name in
+  let _=Ocaml_target_making.feydeau cs (idx::sibling_indices) in 
+  ((cs,[]),(old_files,new_files));;   
 
 let rename_module x old_name new_name=
-      let ((_,new_tgts),(old_files,new_files))=
         rename_module_on_targets (root x)
-          (x,targets x) old_name new_name in  
-         (
-          set_targets x new_tgts;
-         );;    
+          (x,targets x) old_name new_name ;;    
 
 let pre_start_debugging cs=
   let root_dir=root cs in
   let _=Alaskan_remove_debuggables.rd root_dir cs in
   let dbg=Coma_constant.name_for_debugged_module in
+  (*
 	let rdir=compute_subdirectories_list cs in
 	let ap=Find_suitable_ending.find_file_location root_dir rdir 
-	     (dbg^".ml") in
+	     (dbg^".ml") in     
 	let hm=Half_dressed_module.of_path_and_root ap root_dir in
   let answer=Ocaml_target_making.make_final_target
      Compilation_mode_t.Debug (Some hm) cs in
+  *) 
+  let answer=(false,(cs,[],[])) in 
 	let msg=(
 	  if (fst answer)
 	  then "\n\n Now, start \n\nocamldebug _build/"^dbg^".ocaml_debuggable\n\nin another terminal\n\n"
@@ -2412,12 +2340,12 @@ module Save_all=struct
       Io.overwrite_with (Absolute_path.of_string lm) s1;;
     
   
-    let save_loadingsfile (root,location_for_loadingsfile) (dirs,tgts)=
+    let save_loadingsfile (root,location_for_loadingsfile) (dirs,hms)=
        let path_for_loadingsfile=
            (Subdirectory.connectable_to_subpath Coma_constant.automatically_generated_subdir)^
            location_for_loadingsfile in
        let s=Alaskan_up_to_date_targets.loadings (root,location_for_loadingsfile)
-        (dirs,tgts)
+        (dirs,hms)
        and lm=Root_directory.force_join root  path_for_loadingsfile in
        Io.overwrite_with (Absolute_path.of_string lm) s;;
     
@@ -2460,10 +2388,11 @@ module Save_all=struct
       )
       uple= 
       let (mdata,directories,up_to_date_targets,printer_equipped_types)=uple in
+      let hms=up_to_date_hms mdata in 
        (
         Private.save_makefile (root,location_for_makefile) mdata;
         Private.save_merlinfile (root,Coma_constant.name_for_merlinfile) directories;
-        Private.save_loadingsfile (root,location_for_loadingsfile) (directories,up_to_date_targets);
+        Private.save_loadingsfile (root,location_for_loadingsfile) (directories,hms);
         Private.save_targetfile (root,location_for_targetfile) mdata;
         Private.save_printersfile (root,location_for_printersfile) printer_equipped_types;
        );;

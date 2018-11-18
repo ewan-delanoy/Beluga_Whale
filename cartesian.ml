@@ -30,4 +30,4 @@ in
 sub_f(List.rev(x),[[]]);;
 
 let power x n=general_product (Ennig.doyle (fun j->x) 1 n);;
-           
+             

@@ -68,12 +68,13 @@ let leftmost_linedex_of_in_from x y i=
         Strung.number_of_lines_before y j;;    
 
  let occurrences_of_in x y=
-   let  n=String.length y in
+   let lx=String.length x 
+   and n=String.length y in
    let rec tempf=(fun (j,accu)->
       if j>n then List.rev(accu) else
       let k=leftmost_index_of_in_from x y j in
       if k<0 then List.rev(accu) else
-      tempf(k+1,k::accu)
+      tempf(k+lx,k::accu)
    )  in
    tempf (1,[]);;
 

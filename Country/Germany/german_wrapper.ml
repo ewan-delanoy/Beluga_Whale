@@ -125,7 +125,7 @@ let rename_directory (old_subdir,new_subdirname)=
 let rename_module old_name new_name=
     (
             Private.recompile_softly();
-            Coma_state.rename_module Private.main_ref old_name new_name;
+            let _=Coma_state.rename_module Private.main_ref old_name new_name in 
             Private.save_all();
     );;   
                    

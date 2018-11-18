@@ -80,32 +80,4 @@ modify_words_in_string make_legal "aBc\t\nDe\n\t\tFGh klmp";;
 
 *)
       
-let isolate_character_in_string c s=
-    let sc=(String.make 1 c) and n=String.length(s) in 
-    let temp1=replace_fixed_length_pattern_with_constant_in_string
-   (fun s k->
-       if k<2 then false else
-       (Strung.get s k=c)&&
-       (not(List.mem (Strung.get s (k-1)) Charset.list_of_whites))
-   )
-     1  (" "^sc) s in 
-     replace_fixed_length_pattern_with_constant_in_string
-   (fun s k->
-       if k>=n then false else
-       (Strung.get s k=c)&&
-       (not(List.mem (Strung.get s (k+1)) Charset.list_of_whites))
-   )
-     1 (sc^" ") temp1;;
-
-(*
-
-isolate_in_string ';' "abc;def; gh ;ijk ; lmolp"
-
-*)
-
-let  isolate_character_in_file c argument_file=
-    let old_text=Io.read_whole_file argument_file in 
-    let new_text=isolate_character_in_string c  old_text in 
-    Io.overwrite_with argument_file new_text;; 
-
-
+  
