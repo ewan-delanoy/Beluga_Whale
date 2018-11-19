@@ -6,7 +6,6 @@
 *)
 
 
-
 let main_ref=Coma_state_field.empty_one
                 Coma_big_constant.this_world
                 Coma_big_constant.backup_dir_for_this_world;;
@@ -17,9 +16,12 @@ let initialize_if_empty ()=
       if (Coma_state.size main_ref=0) 
       then initialize();;    
 
-
 let ucc ()=
 Coma_state.Create_or_update_copied_compiler.ucc
   main_ref 
  (Coma_big_constant.next_world,
   Coma_big_constant.dummy_backup_dir);;                           
+
+let polished_short_paths ()=
+  Coma_state.all_polished_short_paths   
+      main_ref Coma_big_constant.next_world;;

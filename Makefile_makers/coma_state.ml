@@ -622,11 +622,9 @@ let above_one_in_several_or_inside cs l=
   ordered_as_in_coma_state cs  temp2;;
 
 
-
 let all_mlx_files cs=
   let n=Small_array.size (modules cs) in
   List.flatten(Ennig.doyle(acolytes_at_idx cs) 1 n);;                
-
       
 let all_mlx_paths cs=Image.image Mlx_ended_absolute_path.to_absolute_path 
         (all_mlx_files cs);;  
@@ -634,6 +632,22 @@ let all_mlx_paths cs=Image.image Mlx_ended_absolute_path.to_absolute_path
 let all_short_paths cs=
     let n=Small_array.size (modules cs) in
     List.flatten(Ennig.doyle(short_paths_at_idx cs) 1 n);;  
+
+let all_polished_short_paths cs polish_dir=
+   let unpolish_dir=root cs in 
+   let temp1=all_short_paths cs in 
+   let testf=(fun x->
+      let ttemp2=Io.read_whole_file(Absolute_path.of_string
+      (Root_directory.join unpolish_dir x)) 
+      and ttemp3=Io.read_whole_file(Absolute_path.of_string
+      (Root_directory.join polish_dir x)) in 
+      ttemp2<>ttemp3
+   ) in 
+   let temp4=List.filter testf temp1 in 
+   List.filter (
+     fun x->not(Substring.ends_with x 
+      Coma_constant.name_for_parametersfile)
+   ) temp4;;
 
 let files_containing_string cs some_string=
 let temp1=all_mlx_paths cs in
