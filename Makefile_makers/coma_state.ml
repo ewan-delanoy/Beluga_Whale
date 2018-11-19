@@ -649,6 +649,10 @@ let all_polished_short_paths cs polish_dir=
       Coma_constant.name_for_parametersfile)
    ) temp4;;
 
+let line_inside = "let github_after_backup=ref(true)"^Double_semicolon.ds;;
+let line_outside = "let github_after_backup=ref(false)"^Double_semicolon.ds;;
+
+
 let files_containing_string cs some_string=
 let temp1=all_mlx_paths cs in
 List.filter (fun ap->Substring.is_a_substring_of 
@@ -2445,8 +2449,8 @@ module Create_or_update_copied_compiler=struct
   let list_of_special_files (sourcedir,destdir)=
      [
        Coma_constant.path_for_backerfile,[
-                                           ("let github_after_backup=ref(true)"^Double_semicolon.ds,
-                                            "let github_after_backup=ref(false)"^Double_semicolon.ds)
+                                           (line_inside,
+                                           line_outside)
                                          ];
        Coma_constant.path_for_loadingsfile,default_reps (sourcedir,destdir);
        Coma_constant.path_for_printersfile,default_reps (sourcedir,destdir); 
