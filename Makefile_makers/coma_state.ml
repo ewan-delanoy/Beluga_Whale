@@ -658,11 +658,10 @@ let to_outside cs outside_dir=
    let outside_backer=
      Absolute_path.of_string(
         Root_directory.join outside_dir Coma_constant.path_for_backerfile) in 
-   (
-     Root_directory.mass_copy inside_dir outside_dir temp1;
-     Replace_inside.replace_inside_file
-       (line_inside,line_outside) outside_backer
-   );;
+   let pre_act = Root_directory.mass_copy inside_dir outside_dir temp1 in 
+   let _=Replace_inside.replace_inside_file
+       (line_inside,line_outside) outside_backer in 
+   pre_act;;    
 
 let from_outside cs outside_dir=
    let inside_dir=root cs in 
@@ -670,12 +669,10 @@ let from_outside cs outside_dir=
    let inside_backer=
      Absolute_path.of_string(
         Root_directory.join inside_dir Coma_constant.path_for_backerfile) in 
-   (
-     Root_directory.mass_copy outside_dir outside_dir temp1;
-     Replace_inside.replace_inside_file
-       (line_outside,line_inside) inside_backer
-   );;
-
+   let pre_act = Root_directory.mass_copy outside_dir inside_dir temp1 in 
+   let _=Replace_inside.replace_inside_file
+       (line_outside,line_inside) inside_backer in 
+   pre_act;;    
 
 
 

@@ -67,5 +67,5 @@ let mass_copy dir1 dir2 l=
         if (Sys.file_exists s1)&&(Sys.file_exists s2)
         then Some("cp "^s1^" "^s2)
         else None) l in 
-    temp1;;
+    Image.image Unix_command.uc temp1;;
 
