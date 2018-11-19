@@ -10,7 +10,7 @@ let main_ref=Coma_state_field.empty_one
                 Coma_big_constant.backup_dir_for_this_world;;
 
 
-let from_outside = Coma_state.from_outside  main_ref Coma_big_constant.next_world;; 
+let from_outside ()= Coma_state.from_outside  main_ref Coma_big_constant.next_world;; 
 
 
 let initialize ()=Coma_state.initialize main_ref ;; 
@@ -23,7 +23,7 @@ let polished_short_paths ()=
   Coma_state.all_polished_short_paths   
       main_ref Coma_big_constant.next_world;;
 
-let to_outside = Coma_state.to_outside  main_ref Coma_big_constant.next_world;;  
+let to_outside ()= Coma_state.to_outside  main_ref Coma_big_constant.next_world;;  
 
 let ucc ()=
 Coma_state.Create_or_update_copied_compiler.ucc
