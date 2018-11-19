@@ -59,4 +59,13 @@ let force_join (Root_directory_t.R s) w=
       else let _=Unix_command.uc("touch "^t) in
            t;;
 
-           
+let mass_copy dir1 dir2 l=
+   let temp1=Option.filter_and_unpack (
+      fun w->
+        let s1=join dir1 w 
+        and s2=join dir2 w in 
+        if (Sys.file_exists s1)&&(Sys.file_exists s2)
+        then Some("cp "^s1^" "^s2)
+        else None) l in 
+    temp1;;
+
