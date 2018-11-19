@@ -4,7 +4,7 @@
 
 *)
 
-
+let cod ()=Check_ocaml_dircopy.check Coma_big_constant.this_world;;
 
 let hi = List.length ;; 
 
