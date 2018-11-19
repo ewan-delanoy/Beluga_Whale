@@ -659,7 +659,6 @@ let all_polished_short_paths cs outside_dir=
       Coma_constant.name_for_parametersfile)
    ) temp5;;
 
-
 let to_outside cs outside_dir=
    let inside_dir=root cs in 
    let temp1 = all_polished_short_paths cs outside_dir in 
