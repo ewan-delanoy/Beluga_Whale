@@ -633,6 +633,10 @@ let all_short_paths cs=
     let n=Small_array.size (modules cs) in
     List.flatten(Ennig.doyle(short_paths_at_idx cs) 1 n);;  
 
+let line_inside = "let github_after_backup=ref(true)"^Double_semicolon.ds;;
+let line_outside = "let github_after_backup=ref(false)"^Double_semicolon.ds;;
+
+
 let all_polished_short_paths cs outside_dir=
    let inside_dir=root cs in 
    let temp1=all_short_paths cs in 
@@ -641,16 +645,20 @@ let all_polished_short_paths cs outside_dir=
       (Root_directory.join inside_dir x)) 
       and ttemp3=Io.read_whole_file(Absolute_path.of_string
       (Root_directory.join outside_dir x)) in 
-      ttemp2<>ttemp3
+      let ttemp4=(
+         if x=Coma_constant.path_for_backerfile 
+         then Replace_inside.replace_inside_string
+                (line_inside,line_outside) ttemp2
+         else ttemp2       
+      ) in 
+      ttemp3<>ttemp4
    ) in 
-   let temp4=List.filter testf temp1 in 
+   let temp5=List.filter testf temp1 in 
    List.filter (
      fun x->not(Substring.ends_with x 
       Coma_constant.name_for_parametersfile)
-   ) temp4;;
+   ) temp5;;
 
-let line_inside = "let github_after_backup=ref(true)"^Double_semicolon.ds;;
-let line_outside = "let github_after_backup=ref(false)"^Double_semicolon.ds;;
 
 let to_outside cs outside_dir=
    let inside_dir=root cs in 
