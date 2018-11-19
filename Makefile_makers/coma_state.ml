@@ -633,14 +633,14 @@ let all_short_paths cs=
     let n=Small_array.size (modules cs) in
     List.flatten(Ennig.doyle(short_paths_at_idx cs) 1 n);;  
 
-let all_polished_short_paths cs polish_dir=
-   let unpolish_dir=root cs in 
+let all_polished_short_paths cs outside_dir=
+   let inside_dir=root cs in 
    let temp1=all_short_paths cs in 
    let testf=(fun x->
       let ttemp2=Io.read_whole_file(Absolute_path.of_string
-      (Root_directory.join unpolish_dir x)) 
+      (Root_directory.join inside_dir x)) 
       and ttemp3=Io.read_whole_file(Absolute_path.of_string
-      (Root_directory.join polish_dir x)) in 
+      (Root_directory.join outside_dir x)) in 
       ttemp2<>ttemp3
    ) in 
    let temp4=List.filter testf temp1 in 
@@ -651,6 +651,32 @@ let all_polished_short_paths cs polish_dir=
 
 let line_inside = "let github_after_backup=ref(true)"^Double_semicolon.ds;;
 let line_outside = "let github_after_backup=ref(false)"^Double_semicolon.ds;;
+
+let to_outside cs outside_dir=
+   let inside_dir=root cs in 
+   let temp1 = all_polished_short_paths cs outside_dir in 
+   let outside_backer=
+     Absolute_path.of_string(
+        Root_directory.join outside_dir Coma_constant.path_for_backerfile) in 
+   (
+     Root_directory.mass_copy inside_dir outside_dir temp1;
+     Replace_inside.replace_inside_file
+       (line_inside,line_outside) outside_backer
+   );;
+
+let from_outside cs outside_dir=
+   let inside_dir=root cs in 
+   let temp1 = all_polished_short_paths cs outside_dir in 
+   let inside_backer=
+     Absolute_path.of_string(
+        Root_directory.join inside_dir Coma_constant.path_for_backerfile) in 
+   (
+     Root_directory.mass_copy outside_dir outside_dir temp1;
+     Replace_inside.replace_inside_file
+       (line_outside,line_inside) inside_backer
+   );;
+
+
 
 
 let files_containing_string cs some_string=
