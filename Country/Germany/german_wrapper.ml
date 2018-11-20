@@ -137,11 +137,10 @@ let reposition_module hm (l_before,l_after)=
  ;;   
   
 let start_debugging ()=
-  (
-    Private.recompile_softly();
-    Coma_state.start_debugging Private.main_ref;
+   let _=Private.recompile_softly() in 
+   let _=Coma_state.start_debugging Private.main_ref in 
     Private.save_all();
- );;   
+ ;;   
     
 
     

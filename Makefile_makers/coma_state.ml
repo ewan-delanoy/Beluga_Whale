@@ -2208,8 +2208,6 @@ let rename_directory x (old_subdir,new_subdirname)=
          
       and new_dirs=German_rename_directory.on_subdirectories pair 
         (directories x)
-      and new_tgts=German_rename_directory.on_up_to_date_targets pair 
-        (targets x)
       and new_peqt=German_rename_directory.on_printer_equipped_types pair 
         (preq_types x)
       in
