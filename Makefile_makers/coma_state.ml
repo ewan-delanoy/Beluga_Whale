@@ -1775,11 +1775,6 @@ let uple_form cs=
    targets cs,
    preq_types cs
    );;
-
-let remove_debuggables x=
-  let new_tgts=List.filter Ocaml_target.is_not_a_debuggable
-         (targets x)  in 
-         set_targets x new_tgts;;
     
 let backup x diff opt=
   Alaskan_backup_target_system.backup 

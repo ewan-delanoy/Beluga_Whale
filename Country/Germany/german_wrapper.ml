@@ -55,9 +55,7 @@ let end_debugging ()=
      ^"_build/" in
   let _=Unix_command.uc("rm -f "^sbuild^"*.d.cm*"^" "^
      sbuild^"*.ocaml_debuggable")  in
-  (   
-     Coma_state.remove_debuggables  Private.main_ref;  
-  );;   
+  ();;   
    
 let forget_unregistered_file ap= 
     let _=Private.recompile() in
