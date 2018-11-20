@@ -1831,7 +1831,6 @@ let forget_file x ap=
        (x,directories x,targets x) ap in  
         (
           set_directories x new_dirs;
-          set_targets x new_tgts;
         );;         
 
 module Unregister_module=struct
@@ -1889,7 +1888,6 @@ let forget_module x hm=
       (x,directories x,targets x) hm in
       let _=(
           set_directories x new_dirs;
-          set_targets x new_tgts;
       ) in
       short_paths;;          
 
@@ -2158,7 +2156,6 @@ let refresh cs=
         (
           Coma_state_field.copy_mutables_from cs new_mdata;
           set_directories cs new_dirs;
-          set_targets cs new_tgts;
           set_preq_types cs new_ptypes;
          ) in
          new_diff;; 
@@ -2219,7 +2216,6 @@ let rename_directory x (old_subdir,new_subdirname)=
          (
           
           set_directories x new_dirs;
-          set_targets x new_tgts;
           set_preq_types x new_peqt;  
          );;   
       
@@ -2265,14 +2261,8 @@ let pre_start_debugging cs=
 	answer;;   
    
 
-let start_debugging cs=
-          let (bowl,(_,new_tgts,_))=
-            pre_start_debugging cs  in
-          if bowl
-          then (
-            set_targets cs new_tgts 
-               )
-          else ();;
+let start_debugging cs= re_start_debugging cs;;
+          
 
           
           
@@ -2284,7 +2274,6 @@ let unregister_mlx_file x mlx=
           (x,targets x) mlx in
           (
               set_directories x new_dirs;
-              set_targets x new_tgts;
           ) ;;  
 
 
@@ -2296,7 +2285,6 @@ let unregister_module x hm=
            (x,targets x) hm in
             (
               set_directories x new_dirs;
-              set_targets x new_tgts;
             );;        
 
 
@@ -2507,7 +2495,6 @@ module Create_or_update_copied_compiler=struct
     ) special_files in  
     let (new_mdata2,new_tgts2,preqt)=Target_system_creation.from_main_directory destdir backup_dir in 
     let _=(
-        set_targets new_mdata2 new_tgts2;
         set_preq_types new_mdata2 preqt
     ) in
     let uple=uple_form new_mdata2 in 
