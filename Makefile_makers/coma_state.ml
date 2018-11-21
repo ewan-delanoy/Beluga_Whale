@@ -1776,7 +1776,6 @@ let remove_printer_equipped_type cs hm=
 let uple_form cs=
   (cs,
    directories cs,
-   targets cs,
    preq_types cs
    );;
     
@@ -2420,7 +2419,7 @@ module Save_all=struct
       location_for_printersfile
       )
       uple= 
-      let (mdata,directories,up_to_date_targets,printer_equipped_types)=uple in
+      let (mdata,directories,printer_equipped_types)=uple in
       let hms=up_to_date_hms mdata in 
        (
         Private.save_makefile (root,location_for_makefile) mdata;
