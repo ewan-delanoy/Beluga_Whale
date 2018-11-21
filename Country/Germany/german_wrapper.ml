@@ -167,8 +167,7 @@ let unregister_mlx_file mlx=
     Private.save_all();
    );;        
    
-   
-let up_to_date_targets ()=Coma_state.targets Private.main_ref;;   
+  
    
 
 let view_definition s=
