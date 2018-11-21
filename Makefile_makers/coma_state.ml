@@ -226,7 +226,11 @@ let target_at_idx cs idx=
 
 let usual_targets cs=
   let n=Small_array.size((modules cs)) in
-  let temp1=Ennig.doyle (target_at_idx cs) 1 n in
+  let temp1=Option.filter_and_unpack 
+   (fun idx->
+      if product_up_to_date_at_idx cs idx 
+      then Some(target_at_idx cs idx)
+      else None) (Ennig.ennig 1 n) in
   List.flatten temp1;;
 
 
