@@ -34,7 +34,6 @@ let ancestors_at_idx cs k = Small_array.get (of_t cs).Coma_state_t.ancestors_for
 let needed_dirs_at_idx cs k = Small_array.get (of_t cs).Coma_state_t.needed_dirs_for_module k ;;
 let product_up_to_date_at_idx cs k = Small_array.get (of_t cs).Coma_state_t.product_up_to_date_for_module k ;;
 let directories cs=(of_t cs).Coma_state_t.directories;;
-(* let targets cs=(of_t cs).Coma_state_t.targets;; *)
 let preq_types cs=(of_t cs).Coma_state_t.printer_equipped_types;;
 
 
@@ -56,7 +55,6 @@ let set_ancestors_at_idx cs k v = Small_array.set (of_t cs).Coma_state_t.ancesto
 let set_needed_dirs_at_idx cs k v = Small_array.set (of_t cs).Coma_state_t.needed_dirs_for_module k v ;;
 let set_product_up_to_date_at_idx cs k = Small_array.set (of_t cs).Coma_state_t.product_up_to_date_for_module k ;;
 let set_directories cs dirs=(of_t cs).Coma_state_t.directories<- dirs;;
-(* let set_targets cs tgts=(of_t cs).Coma_state_t.targets<- tgts;; *)
 let set_preq_types cs preqt=(of_t cs).Coma_state_t.printer_equipped_types<-preqt;;
 
 
@@ -78,7 +76,6 @@ let empty_one x y=to_t({
      needed_dirs_for_module = Small_array.of_list [];
      product_up_to_date_for_module = Small_array.of_list [];
      directories =[];
-     targets     =[];
      printer_equipped_types =[];
 });;
   
@@ -101,7 +98,6 @@ let copy_mutables_from wrapped_cs_x wrapped_cs_y=
      Small_array.copy_from cs_x.Coma_state_t.needed_dirs_for_module cs_y.Coma_state_t.needed_dirs_for_module;
      Small_array.copy_from cs_x.Coma_state_t.product_up_to_date_for_module cs_y.Coma_state_t.product_up_to_date_for_module;
      cs_x.directories <- cs_y.directories ;
-     cs_x.targets  <- cs_y.targets ;
      cs_x.printer_equipped_types <- cs_y.printer_equipped_types ;
 );;
 
@@ -249,8 +245,7 @@ let archive wrapped_cs=
         and t12=cs.Coma_state_t.needed_dirs_for_module
         and t13=cs.Coma_state_t.product_up_to_date_for_module
         and t14=cs.Coma_state_t.directories 
-        and t15=cs.Coma_state_t.targets 
-        and t16=cs.Coma_state_t.printer_equipped_types in
+        and t15=cs.Coma_state_t.printer_equipped_types in
         let list_arch=(fun old_arch a_list->
         Nonblank.make(String.concat inner_separator 
            (Image.image old_arch a_list)
@@ -275,8 +270,7 @@ let archive wrapped_cs=
          arrlist_arch (fun (Subdirectory_t.SD s)->s) t12;
          Small_array.archive string_of_bool t13;
          list_arch (fun w->Nonblank.make(Subdirectory.without_trailing_slash w)) t14;
-         list_arch Ocaml_target.archive t15;
-         list_arch Half_dressed_module.archive_pair t16;
+         list_arch Half_dressed_module.archive_pair t15;
         ];;
       
         
@@ -309,8 +303,7 @@ let unarchive s=
           needed_dirs_for_module = arrlist_unarch (fun s->Subdirectory_t.SD s) (part 12);
           product_up_to_date_for_module = Small_array.unarchive bool_of_string (part 13) ;
           directories = list_unarch (fun v->Subdirectory.of_string(Nonblank.decode v)) (part 14);
-          targets = list_unarch Ocaml_target.unarchive (part 15) ; 
-          printer_equipped_types = list_unarch Half_dressed_module.unarchive_pair (part 16);
+          printer_equipped_types = list_unarch Half_dressed_module.unarchive_pair (part 15);
       
        });; 
       
