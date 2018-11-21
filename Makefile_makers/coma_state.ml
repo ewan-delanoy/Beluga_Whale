@@ -22,7 +22,6 @@ let ancestors_at_idx = Coma_state_field.ancestors_at_idx ;;
 let needed_dirs_at_idx  = Coma_state_field.needed_dirs_at_idx ;;
 let product_up_to_date_at_idx = Coma_state_field.product_up_to_date_at_idx ;;
 let directories = Coma_state_field.directories;;
-let targets = Coma_state_field.targets;;
 let preq_types = Coma_state_field.preq_types;;
 
 let set_module_at_idx = Coma_state_field.set_module_at_idx ;;
@@ -37,8 +36,12 @@ let set_ancestors_at_idx = Coma_state_field.set_ancestors_at_idx ;;
 let set_needed_dirs_at_idx  = Coma_state_field.set_needed_dirs_at_idx ;;
 let set_product_up_to_date_at_idx = Coma_state_field.set_product_up_to_date_at_idx ;;
 let set_directories = Coma_state_field.set_directories;;
-let set_targets = Coma_state_field.set_targets;;
 let set_preq_types = Coma_state_field.set_preq_types;;
+
+(*
+let targets = Coma_state_field.targets;;
+let set_targets = Coma_state_field.set_targets;;
+*)
 
 
 let modules = Coma_state_field.modules;;
@@ -1783,7 +1786,7 @@ let backup x diff opt=
   Alaskan_backup_target_system.backup 
   (root x,backup_dir x) diff opt;;
 
-  let unregister_mlx_file_on_targets root_dir (cs,old_tgts) mlx=
+  let unregister_mlx_file_on_targets root_dir cs mlx=
     let hm=Mlx_ended_absolute_path.half_dressed_core mlx in 
     let nm=Half_dressed_module.naked_module hm in 
     let idx=find_module_index cs nm in
@@ -1801,19 +1804,19 @@ let backup x diff opt=
     let _=(if was_lonely 
            then ([],[]) 
            else Ocaml_target_making.feydeau cs (idx::sibling_indices) ) in 
-    (cs,new_dirs,[]);;   
+    (cs,new_dirs);;   
 
 exception FileWithDependencies of 
 Mlx_ended_absolute_path.t*(Naked_module_t.t list);;
 
 
-let forget_file_on_targets root_dir triple ap=
-  let (cs,dirs,tgts)=triple in
+let forget_file_on_targets root_dir pair ap=
+  let (cs,dirs)=pair in
   let hm=Half_dressed_module.of_path_and_root ap root_dir 
   and mlx=Mlx_ended_absolute_path.of_path_and_root ap root_dir  in
   let nm=Half_dressed_module.naked_module hm in
   match seek_module_index  cs nm with
-   None->triple
+   None->pair
   |Some(_)->
    let bel=below cs (Mlx_ended_absolute_path.half_dressed_core mlx) in
     if bel=[]
@@ -1822,16 +1825,14 @@ let forget_file_on_targets root_dir triple ap=
          let _=Image.image
          (fun edg->Unix_command.uc("rm -f "^fn^edg^"*"))
          [".cm";".d.cm";".caml_debuggable"] in
-         unregister_mlx_file_on_targets root_dir 
-            (cs,tgts) mlx
+         unregister_mlx_file_on_targets root_dir cs mlx
     else raise(FileWithDependencies(mlx,bel));;
 
 
 
 let forget_file x ap=
-    let (_,new_dirs,new_tgts)= 
-     forget_file_on_targets (root x)
-       (x,directories x,targets x) ap in  
+    let (_,new_dirs)= 
+     forget_file_on_targets (root x) (x,directories x) ap in  
         (
           set_directories x new_dirs;
         );;         
@@ -1848,10 +1849,10 @@ let test_for_non_obsolescence (hm,short_paths) tgt=
       );;    
 
 
-let on_targets root_dir (cs,old_tgts) hm=
+let on_targets root_dir cs hm=
     let (new_cs,short_paths)=unregister_module_on_monitored_modules  cs hm in
     let new_dirs=compute_subdirectories_list new_cs  in
-     ((cs,new_dirs,[]),short_paths);;   
+     ((cs,new_dirs),short_paths);;   
      
    
 
@@ -1861,7 +1862,7 @@ exception ModuleWithDependenciesDuringForgetting of
         Half_dressed_module.t*(Naked_module_t.t list);;
 exception Non_registered_module_during_forgetting of Naked_module_t.t;;
       
-let forget_module_on_targets root_dir (cs,dirs,tgts) hm=
+let forget_module_on_targets root_dir (cs,dirs) hm=
         let nm=Half_dressed_module.naked_module hm in
         match seek_module_index  cs nm with
          None->raise(Non_registered_module_during_forgetting(nm))
@@ -1869,7 +1870,7 @@ let forget_module_on_targets root_dir (cs,dirs,tgts) hm=
          let bel=below cs hm in
           if bel=[]
           then let (answer,short_paths)=Unregister_module.on_targets root_dir 
-                          (cs,tgts) hm in
+                          cs hm in
                let sfn=Half_dressed_module.to_shortened_string hm in
                let _=Image.image
                (fun edg->
@@ -1886,9 +1887,8 @@ let forget_module_on_targets root_dir (cs,dirs,tgts) hm=
       
 
 let forget_module x hm=
-    let ((_,new_dirs,new_tgts),short_paths)= 
-      forget_module_on_targets (root x)
-      (x,directories x,targets x) hm in
+    let ((_,new_dirs),short_paths)= 
+      forget_module_on_targets (root x) (x,directories x) hm in
       let _=(
           set_directories x new_dirs;
       ) in
@@ -2165,7 +2165,7 @@ let refresh cs=
 
 module Register_mlx_file=struct
 
-let on_targets (cs,old_dirs,old_tgts) mlx=
+let on_targets (cs,old_dirs) mlx=
     let hm=Mlx_ended_absolute_path.half_dressed_core mlx in
     let new_dir=Half_dressed_module.subdirectory hm in
    let _=register_mlx_file_on_monitored_modules cs mlx in
@@ -2175,32 +2175,29 @@ let on_targets (cs,old_dirs,old_tgts) mlx=
     let nm=Half_dressed_module.naked_module hm in 
     let idx=find_module_index cs nm in 
     let _=Ocaml_target_making.feydeau cs [idx] in 
-    (cs,new_dirs,[]);; 
+    (cs,new_dirs);; 
   
 
 end;;  
 
 
 let register_mlx_file cs mlx=
-          let (_,new_dirs,_)= 
-          Register_mlx_file.on_targets 
-           (cs,directories cs,targets cs) mlx in   
+          let (_,new_dirs)= 
+          Register_mlx_file.on_targets (cs,directories cs) mlx in   
             (
               set_directories cs new_dirs;
             ) ;;             
 
-let relocate_module_on_targets root_dir (cs,old_tgts) old_name new_subdir= 
+let relocate_module_on_targets root_dir cs old_name new_subdir= 
   let (new_cs,(old_files,new_files))=
     relocate_module_on_monitored_modules root_dir cs old_name new_subdir in   
-  ((cs,[]),(old_files,new_files));;   
+  (cs,(old_files,new_files));;   
  
 
 
 let relocate_module x old_name new_subdir=
   let _=
-    relocate_module_on_targets (root x)
-       (x,targets x) 
-       old_name new_subdir in
+    relocate_module_on_targets (root x) x old_name new_subdir in
      ();;    
 
 let rename_directory x (old_subdir,new_subdirname)=
@@ -2220,7 +2217,7 @@ let rename_directory x (old_subdir,new_subdirname)=
           set_preq_types x new_peqt;  
          );;   
       
-let rename_module_on_targets root_dir (cs,old_tgts) old_name new_name= 
+let rename_module_on_targets root_dir cs old_name new_name= 
   let old_nm=Half_dressed_module.naked_module old_name in 
   let idx=find_module_index cs old_nm in 
   let n=size cs in 
@@ -2231,11 +2228,10 @@ let rename_module_on_targets root_dir (cs,old_tgts) old_name new_name=
   let (new_cs,(old_files,new_files))=
      rename_module_on_monitored_modules root_dir cs old_name new_name in
   let _=Ocaml_target_making.feydeau cs (idx::sibling_indices) in 
-  ((cs,[]),(old_files,new_files));;   
+  (cs,(old_files,new_files));;   
 
 let rename_module x old_name new_name=
-        rename_module_on_targets (root x)
-          (x,targets x) old_name new_name ;;    
+        rename_module_on_targets (root x) x old_name new_name ;;    
 
 let pre_start_debugging cs=
   let root_dir=root cs in
@@ -2270,9 +2266,8 @@ let start_debugging cs= pre_start_debugging cs;;
 
 
 let unregister_mlx_file x mlx=
-        let (_,new_dirs,new_tgts)= 
-          unregister_mlx_file_on_targets (root x)
-          (x,targets x) mlx in
+        let (_,new_dirs)= 
+          unregister_mlx_file_on_targets (root x) x  mlx in
           (
               set_directories x new_dirs;
           ) ;;  
@@ -2281,9 +2276,8 @@ let unregister_mlx_file x mlx=
 
 
 let unregister_module x hm=
-        let ((_,new_dirs,new_tgts),short_paths)= 
-         Unregister_module.on_targets (root x)
-           (x,targets x) hm in
+        let ((_,new_dirs),short_paths)= 
+         Unregister_module.on_targets (root x) x  hm in
             (
               set_directories x new_dirs;
             );;        
