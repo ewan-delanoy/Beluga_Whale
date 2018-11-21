@@ -34,7 +34,7 @@ let ancestors_at_idx cs k = Small_array.get (of_t cs).Coma_state_t.ancestors_for
 let needed_dirs_at_idx cs k = Small_array.get (of_t cs).Coma_state_t.needed_dirs_for_module k ;;
 let product_up_to_date_at_idx cs k = Small_array.get (of_t cs).Coma_state_t.product_up_to_date_for_module k ;;
 let directories cs=(of_t cs).Coma_state_t.directories;;
-let targets cs=(of_t cs).Coma_state_t.targets;;
+(* let targets cs=(of_t cs).Coma_state_t.targets;; *)
 let preq_types cs=(of_t cs).Coma_state_t.printer_equipped_types;;
 
 
@@ -56,7 +56,7 @@ let set_ancestors_at_idx cs k v = Small_array.set (of_t cs).Coma_state_t.ancesto
 let set_needed_dirs_at_idx cs k v = Small_array.set (of_t cs).Coma_state_t.needed_dirs_for_module k v ;;
 let set_product_up_to_date_at_idx cs k = Small_array.set (of_t cs).Coma_state_t.product_up_to_date_for_module k ;;
 let set_directories cs dirs=(of_t cs).Coma_state_t.directories<- dirs;;
-let set_targets cs tgts=(of_t cs).Coma_state_t.targets<- tgts;;
+(* let set_targets cs tgts=(of_t cs).Coma_state_t.targets<- tgts;; *)
 let set_preq_types cs preqt=(of_t cs).Coma_state_t.printer_equipped_types<-preqt;;
 
 
