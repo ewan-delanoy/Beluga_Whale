@@ -48,6 +48,48 @@ let  modify_words_in_file f argument_file=
     let new_text=modify_words_in_string f old_text in 
     Io.overwrite_with argument_file new_text;; 
 
+exception Unmatched_left_parenthesis of int;;
+
+let naive_paren_decomposer (left_paren,right_paren) s=
+   let n=String.length s 
+   and m_left=String.length left_paren 
+   and m_right=String.length right_paren in 
+   let rec tempf=(
+      fun (graet,j)->
+        if j>n
+        then List.rev(graet)
+        else
+        let k=Substring.leftmost_index_of_in_from left_paren s j in 
+        if k<0
+        then List.rev(((j,n),Cull_string.interval s j n,false)::graet)
+        else
+        let k2=k+m_left in 
+        let k3=Substring.leftmost_index_of_in_from right_paren s k2 in 
+        if k3<0
+        then raise(Unmatched_left_parenthesis(k))
+        else 
+        let k4=k3+m_right in 
+        let temp=(if k=j then graet else ((j,k-1),Cull_string.interval s j (k-1),false)::graet) in 
+        tempf(((k,k4-1),Cull_string.interval s k2 (k3-1),true)::temp,k4) 
+   ) in 
+   tempf([],1);;
+
+let compress_italics_in_string s=
+  let temp1=naive_paren_decomposer ("[i]","[/i]") s in 
+  let temp2=Image.image(
+    fun (_,content,is_italicized)->
+      if is_italicized 
+      then "[i]"^(Cull_string.trim_spaces content)^"[/i]"
+      else content
+  ) temp1 in 
+  String.concat "" temp2;;
+
+let  compress_italics_in_file argument_file=
+    let old_text=Io.read_whole_file argument_file in 
+    let new_text=compress_italics_in_string old_text in 
+    Io.overwrite_with argument_file new_text;; 
+
+
 (*
 
 replace_fixed_length_pattern_with_constant_in_string
@@ -76,8 +118,9 @@ let make_legal s=
 
 modify_words_in_string make_legal "aBc\t\nDe\n\t\tFGh klmp";;
   
+naive_paren_decomposer ("[i]","[/i]") "123[i]45[/i]67[i]8[/i][i]9[/i]01234[i]56[/i]7";;
 
+ compress_italics_in_string "123[i]  45\n\r\t[/i]67[i]8[/i][i]9\n[/i]01234[i]\t\t56[/i]7";;
 
 *)
       
-  

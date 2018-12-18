@@ -304,7 +304,6 @@ let unarchive s=
           product_up_to_date_for_module = Small_array.unarchive bool_of_string (part 13) ;
           directories = list_unarch (fun v->Subdirectory.of_string(Nonblank.decode v)) (part 14);
           printer_equipped_types = list_unarch Half_dressed_module.unarchive_pair (part 15);
-      
        });; 
       
        
