@@ -36,7 +36,7 @@ let replace_fixed_length_pattern_with_constant_in_file
     Io.overwrite_with argument_file new_text;; 
 
 let modify_words_in_string f s=
-  let temp1=Str.full_split (Str.regexp"[ \n\r\t]+")  s in 
+  let temp1=Str.full_split (Str.regexp"[\"'.,;: \n\r\t]+")  s in 
   let temp2=Image.image (function
      Str.Delim(delim)->delim
      |Str.Text(text)->f text
